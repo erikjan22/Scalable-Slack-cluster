@@ -1,0 +1,181 @@
+Skip to content
+Search or jump to…
+
+Pull requests
+Issues
+Marketplace
+Explore
+ 
+@zain2703 
+Learn Git and GitHub without any code!
+Using the Hello World guide, you’ll start a branch, write comments, and open a pull request.
+
+
+# 4
+# 323SNICScienceCloud/technical-training
+ # Code Issues 0 Pull requests 0 Projects 0 Wiki Security Insights
+# technical-training/automation/orchestration/heat-template/ssc-test-stack.yml
+# @sztoor sztoor Update ssc-test-stack.yml
+# 34ea55f on Sep 27, 2018
+# @sztoor@ahellander
+# 148 lines (128 sloc)  3.86 KB
+ 
+#################
+# A comprehensive implementation of injecting public keys is available on following URL:
+#
+#https://github.com/openstack/heat-templates/blob/master/hot/software-config/example-templates/example-ssh-copy-id.yaml
+#################
+
+
+heat_template_version: 2013-05-23
+
+description: Simple template to deploy a single compute instance
+
+# Declare parameters 
+parameters:
+
+  image:
+    type: string
+    label: Image name or ID
+    description: Image to be used for compute instance
+    default: 12e3bcbb-7bec-4ce3-8710-0b7e8cb6bbba
+
+  flavor:
+    type: string
+    label: Flavor
+    description: Type of instance (flavor) to be used
+    default: ssc.small
+
+  key:
+    type: string
+    label: Key name
+    description: Name of key-pair to be used for compute instance
+    default:team6key
+
+  public_network:
+    type: string
+    label: Public network name or ID
+    description: Public network with floating IP addresses.
+    default: Public External IPv4 Network
+
+# Resource allocation
+resources:
+  team6_cluster:
+    type: OS::Neutron::SecurityGroup
+    properties:
+      name: team6_cluster
+      rules:
+        - protocol: icmp
+        - protocol: tcp
+          port_range_min: 22
+          port_range_max: 22
+ 
+  private_network:
+    type: OS::Neutron::Net
+
+  private_subnet:
+    type: OS::Neutron::Subnet
+    properties:
+      network_id: { get_resource: private_network }
+      cidr: 10.10.10.0/24
+      dns_nameservers:
+        - 130.238.164.6 
+        - 130.238.4.133 
+        - 130.238.7.10
+        - 130.239.1.90
+        - 129.16.1.53
+  router:
+    type: OS::Neutron::Router
+    properties:
+      external_gateway_info:
+        network: { get_param: public_network }
+
+  router-interface:
+    type: OS::Neutron::RouterInterface
+    properties:
+      router_id: { get_resource: router }
+      subnet: { get_resource: private_subnet }
+
+  instance_port0:
+    type: OS::Neutron::Port
+    properties:
+      network: { get_resource: private_network }
+      security_groups:
+        - { get_resource: team6_cluster }
+  instance_port1:
+    type: OS::Neutron::Port
+    properties:
+      network: { get_resource: private_network }
+      security_groups:
+        - { get_resource: team6_cluster }
+ 
+  my_instance0:
+    type: OS::Nova::Server
+    properties:
+      image: { get_param: image }
+      flavor: { get_param: flavor }
+      key_name: { get_param: key }
+      #security_groups:
+      #  - { get_resource: team6_cluster }
+      networks:
+        - port: { get_resource: instance_port0 }         
+      user_data: |
+        #!/bin/sh
+        echo "Hello, World!"
+        echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC7MO3V59P1dV0RVzyBtWr8v/N4ND9391MOl2Urv1G3qFx7kob0SLPnr4mpew9xDB+3ZzDPRlFts7eLeTiq4pWpwybeZ40KUnAHKttTli7uhAkBKpHYKMOH7WvuMuHYJjY$" >> /home/ubuntu/.ssh/authorized_keys
+        apt-add-repository -y ppa:ansible/ansible
+        apt-get update -y
+        apt-get upgrade -y
+        apt-get install -y ansible
+      user_data_format: RAW
+
+  my_instance1:
+    type: OS::Nova::Server
+    properties:
+      image: { get_param: image }
+      flavor: { get_param: flavor }
+      key_name: { get_param: key }
+      #security_groups:
+      #  - { get_resource: team6_cluster }
+      networks:
+        - port: { get_resource: instance_port1 }
+      user_data: |
+        #!/bin/sh
+        echo "Hello, World!"
+        echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC7MO3V59P1dV0RVzyBtWr8v/N4ND9391MOl2Urv1G3qFx7kob0SLPnr4mpew9xDB+3ZzDPRlFts7eLeTiq4pWpwybeZ40KUnAHKttTli7uhAkBKpHYKMOH7WvuMuHYJjY$" >> /home/ubuntu/.ssh/authorized_keys
+        apt-get update -y
+        apt-get upgrade -y
+      user_data_format: RAW
+
+
+  floating_ip:
+    type: OS::Neutron::FloatingIP
+    properties:
+      floating_network: { get_param: public_network }
+
+  floating_ip_assoc:
+    type: OS::Neutron::FloatingIPAssociation
+    properties:
+      floatingip_id: { get_resource: floating_ip }
+      port_id: { get_resource: instance_port0 } 
+
+# Output in case of successful booting
+outputs:
+  instance_name:
+    description: Name of the instance
+    value: { get_attr: [my_instance0, name] }
+  instance_ip:
+    description: IP address of the instance
+    value: { get_attr: [my_instance0, first_address, floating_ip, floating_ip_address] }
+© 2019 GitHub, Inc.
+Terms
+Privacy
+Security
+Status
+Help
+Contact GitHub
+Pricing
+API
+Training
+Blog
+About
