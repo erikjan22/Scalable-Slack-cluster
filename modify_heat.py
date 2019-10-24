@@ -1,30 +1,43 @@
-import yaml
+from ruamel import yaml
+from flask import Flask, request
 
-def set_workers(file_name, workers):
-    with open(file_name) as f:
+app = Flask(__name__)
+
+@app.route('/QTL/test')
+def test():
+    return 'Hello world!'
+
+
+@app.route('/QTL/set_workers', methods=['GET'])
+def set_workers():
+    """                                                                                
+    Set up how many workers to use                                                     
+    TODO: Fix so user can add more                                                     
+    """
+    heat_template = 'Heat_v6_test.yml'
+    workers = 2
+    #workers = request.form['Workers: ']
+    with open(heat_template) as f:
         list_doc = yaml.load(f)
         parameters = list_doc['parameters']
         node_count = parameters['node_count']
+        list_doc['parameters']['node_count']['default'] = workers
         
-        #return node_count
+        with open(heat_template, 'w') as f:
+            yaml.dump(list_doc, f, default_flow_style=False)
+            
+            return 0
 
-        list_doc['parameters']['node_count']['num_workers'] = workers
 
-    with open(file_name, 'w') as f:
-        yaml.dump(list_doc, f)
+@app.route('/QTL/run', methods=['GET'])
+def start_workers():
+    """                                                                                
+    Start the workers                                                                  
+    """
+    setup = render_template('setup.yml', title='Setup')
+    cmd = openstack stack create team6 -f 'yaml' -t 'Heat_v6_test.yml'
     
-def count_worker():
-    num = 0
-    f = open('../../../etc/ansible/hosts')
-    for i in f:
-        if i.strip() == "[sparkworker]":
-            num += 1
-        else:
-            continue
-    f.close()
-    return num
+    return cmd
 
-c = set_workers('Heat_v6_test.yml', 3)
-print(c)
-
-# Get the floating IP from the heat template 
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', debug=True)
