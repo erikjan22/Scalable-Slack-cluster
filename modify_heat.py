@@ -1,18 +1,15 @@
+import subprocess
 from ruamel import yaml
 from flask import Flask, request
 
 app = Flask(__name__)
 
-@app.route('/QTL/test')
-def test():
-    return 'Hello world!'
-
 
 @app.route('/QTL/set_workers', methods=['GET'])
 def set_workers():
-    """                                                                                
-    Set up how many workers to use                                                     
-    TODO: Fix so user can add more                                                     
+    """                                                                               
+    Set up how many workers to use   
+    TODO: Fix so user can add more  
     """
     heat_template = 'Heat_v6_test.yml'
     workers = 2
@@ -31,13 +28,14 @@ def set_workers():
 
 @app.route('/QTL/run', methods=['GET'])
 def start_workers():
-    """                                                                                
-    Start the workers                                                                  
+    """                                                                               
+    Start the stack of workers
     """
-    setup = render_template('setup.yml', title='Setup')
-    cmd = openstack stack create team6 -f 'yaml' -t 'Heat_v6_test.yml'
-    
-    return cmd
+    cmd = "openstack stack create team6_v2 -f 'yaml' -t 'Heat_v6_test.yml'"
+    process = subprocess.Popen(cmd.split(), stdout=subprocess.PIPE)
+    output, error = process.communicate()
+    return output, error
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)
