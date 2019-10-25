@@ -1,0 +1,40 @@
+<!doctype html>
+<html title>
+  
+  <form method="POST">
+    <head>
+      <meta charset="UTF-8" />
+      <title>QTLaaS - Start</title>
+    </head>
+
+    <ul>
+      <li><a href="index">Home</a></li>
+      <li><a href="set_workers">Setup</a></li>
+      <li><a href="run">Run</a></li>
+      <li><a href="about">About</a></li>
+    </ul> 
+    
+    <body>
+      <h1>Welcome to the setup page</h1>
+      <p>Please add how many workers to add to the cluster.</p>
+      
+      <div class="form-group">
+        <input type="number" min="0" class="line-input"
+               name="numWorkers"
+               placeholder="Workers">
+      </div>
+
+      <div class="form-group">
+        <input type="number" min="0" class="line-input"
+               name="removeWorkers"
+               placeholder="Remove Workers">
+        
+        <div class="form-group">
+          <button type="submit"
+                  class="btn btn-light text-primary btn-block"
+                  style="margin : 20px 20px -10px 0px">Submit
+          </button>
+        </div>
+    </body>
+  </form>
+</html>
