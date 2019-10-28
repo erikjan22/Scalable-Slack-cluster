@@ -2,7 +2,6 @@ import subprocess
 from ruamel import yaml
 from flask import Flask, request, render_template
 
-
 import os
 import sys
 import time

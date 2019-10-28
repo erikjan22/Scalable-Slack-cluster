@@ -1,0 +1,172 @@
+description: Cluster for Qtl
+heat_template_version: 2016-10-14
+outputs:
+  instance_ip:
+    description: IP address of the instance
+    value:
+      get_attr:
+      - master
+      - first_address
+      - floating_ip
+      - floating_ip_address
+  instance_name:
+    description: Name of the instance
+    value:
+      get_attr:
+      - master
+      - name
+parameters:
+  flavor:
+    default: ssc.small
+    description: Type of instance (flavor) to be used
+    label: Flavor
+    type: string
+  image:
+    default: dca488d5-ca09-458f-8983-898d3ddcfd2b
+    description: Image to be used for compute instance
+    label: Image name or ID
+    type: string
+  key:
+    default: zain4_key
+    description: Name of key-pair to be used for compute instance
+    label: Key name
+    type: string
+  node_count:
+    default: 2
+    description: Default number of nodes
+    type: number
+  private_network_name:
+    default: team6_private_network
+    description: Private network with internal IP addresses.
+    label: Private network name or ID
+    type: string
+  private_subnet_name:
+    default: team6_private_subnet
+    description: Private subnet with internal IP addresses.
+    label: Private subnet name or ID
+    type: string
+  public_network_name:
+    default: Public External IPv4 Network
+    description: Public network with floating IP addresses.
+    label: Public network name or ID
+    type: string
+resources:
+  floating_ip:
+    properties:
+      floating_network:
+        get_param: public_network_name
+    type: OS::Neutron::FloatingIP
+  floating_ip_assoc:
+    properties:
+      floatingip_id:
+        get_resource: floating_ip
+      port_id:
+        get_resource: master_port0
+    type: OS::Neutron::FloatingIPAssociation
+  group_slaves:
+    properties:
+      count:
+        get_param: node_count
+      resource_def:
+        properties:
+          flavor:
+            get_param: flavor
+          image:
+            get_param: image
+          key_name:
+            get_param: key
+          name: team6_cluster_slave-%index%
+          networks:
+          - network:
+              get_resource: private_network
+          user_data: "#!/bin/sh\necho \"Hello, World!\"\necho \"ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC7MO3V59P1dV0RVzyBtWr8v/N4ND9391MOl2Urv1G3qFx7kob0SLPnr4mpew9xDB+3ZzDPRlFts7eLeTiq4pWpwybeZ40KUnAHKttTli7uhAkBKpHYKMOH7WvuMuHYJjY$\"\
+            \ >> /home/ubuntu/.ssh/authorized_keys\napt-get update -y\napt-get upgrade\
+            \ -y\n"
+          user_data_format: RAW
+        type: OS::Nova::Server
+    type: OS::Heat::ResourceGroup
+  master:
+    properties:
+      flavor:
+        get_param: flavor
+      image:
+        get_param: image
+      key_name:
+        get_param: key
+      name: team6_master_group
+      networks:
+      - port:
+          get_resource: master_port0
+      user_data: "#!/bin/bash\necho \"Hello, World!\"\necho \"ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC7MO3V59P1dV0RVzyBtWr8v/N4ND9391MOl2Urv1G3qFx7kob0SLPnr4mpew9xDB+3ZzDPRlFts7eLeTiq4pWpwybeZ40KUnAHKttTli7uhAkBKpHYK$\n\
+        apt-add-repository -y ppa:ansible/ansible\napt-get update -y\napt-get upgrade\
+        \ -y\n"
+      user_data_format: RAW
+    type: OS::Nova::Server
+  master_port0:
+    properties:
+      network:
+        get_resource: private_network
+      security_groups:
+      - get_resource: team6_cluster_group
+      - get_resource: team6_master_group
+    type: OS::Neutron::Port
+  private_network:
+    properties:
+      name:
+        get_param: private_network_name
+    type: OS::Neutron::Net
+  private_subnet:
+    properties:
+      cidr: 10.10.9.0/24
+      dns_nameservers:
+      - 130.238.164.6
+      - 130.238.4.133
+      - 130.238.7.10
+      - 130.239.1.90
+      - 129.16.1.53
+      name:
+        get_param: private_subnet_name
+      network_id:
+        get_resource: private_network
+    type: OS::Neutron::Subnet
+  router:
+    properties:
+      external_gateway_info:
+        network:
+          get_param: public_network_name
+    type: OS::Neutron::Router
+  router-interface:
+    properties:
+      router_id:
+        get_resource: router
+      subnet:
+        get_resource: private_subnet
+    type: OS::Neutron::RouterInterface
+  team6_cluster_group:
+    properties:
+      name: team6_cluster_group
+      rules:
+      - port_range_max: 22
+        port_range_min: 22
+        protocol: tcp
+    type: OS::Neutron::SecurityGroup
+  team6_master_group:
+    properties:
+      name: team6_master_group
+      rules:
+      - port_range_max: 5555
+        port_range_min: 5555
+        protocol: tcp
+      - port_range_max: 5000
+        port_range_min: 5000
+        protocol: tcp
+      - port_range_max: 3306
+        port_range_min: 3306
+        protocol: tcp
+      - port_range_max: 5672
+        port_range_min: 5672
+        protocol: tcp
+      - port_range_max: 22
+        port_range_min: 22
+        protocol: tcp
+    type: OS::Neutron::SecurityGroup
