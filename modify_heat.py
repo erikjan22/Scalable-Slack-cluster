@@ -67,7 +67,7 @@ def start_instance():
     heat_template = 'Heat_test.yml'
     #if request.method == 'POST':
         #workers = request.form['numWorkers']
-    workers = 2
+    workers = request.args.get('workers')
     with open(heat_template) as f:
         list_doc = yaml.safe_load(f)
         parameters = list_doc['parameters']
