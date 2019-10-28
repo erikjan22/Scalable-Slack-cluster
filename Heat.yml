@@ -1,44 +1,13 @@
-Skip to content
-Search or jump to…
+heat_template_version: 2016-10-14
 
-Pull requests
-Issues
-Marketplace
-Explore
- 
-@zain2703 
-Learn Git and GitHub without any code!
-Using the Hello World guide, you’ll start a branch, write comments, and open a pull request.
+description: Cluster for Qtl
 
-
-# 4
-# 323SNICScienceCloud/technical-training
- # Code Issues 0 Pull requests 0 Projects 0 Wiki Security Insights
-# technical-training/automation/orchestration/heat-template/ssc-test-stack.yml
-# @sztoor sztoor Update ssc-test-stack.yml
-# 34ea55f on Sep 27, 2018
-# @sztoor@ahellander
-# 148 lines (128 sloc)  3.86 KB
- 
-#################
-# A comprehensive implementation of injecting public keys is available on following URL:
-#
-#https://github.com/openstack/heat-templates/blob/master/hot/software-config/example-templates/example-ssh-copy-id.yaml
-#################
-
-
-heat_template_version: 2013-05-23
-
-description: Simple template to deploy a single compute instance
-
-# Declare parameters 
 parameters:
-
   image:
     type: string
     label: Image name or ID
     description: Image to be used for compute instance
-    default: 12e3bcbb-7bec-4ce3-8710-0b7e8cb6bbba
+    default: dca488d5-ca09-458f-8983-898d3ddcfd2b
 
   flavor:
     type: string
@@ -50,34 +19,75 @@ parameters:
     type: string
     label: Key name
     description: Name of key-pair to be used for compute instance
-    default:team6key
+    default: team6key
 
-  public_network:
+  public_network_name:
     type: string
     label: Public network name or ID
     description: Public network with floating IP addresses.
     default: Public External IPv4 Network
+  
+  private_network_name:
+    type: string
+    label: Private network name or ID
+    description: Private network with internal IP addresses.
+    default: team6_private_network
+    
+  private_subnet_name:
+    type: string
+    label: Private subnet name or ID
+    description: Private subnet with internal IP addresses.
+    default: team6_private_subnet
 
+  node_count:
+    type: number
+    default: 4
+    description: Default number of nodes
+    
 # Resource allocation
 resources:
-  team6_cluster:
+  team6_cluster_group:
     type: OS::Neutron::SecurityGroup
     properties:
-      name: team6_cluster
+      name: team6_cluster_group
       rules:
-        - protocol: icmp
         - protocol: tcp
           port_range_min: 22
           port_range_max: 22
- 
+  team6_master_group:
+    type: OS::Neutron::SecurityGroup
+    properties:
+      name: team6_master_group
+      rules:
+        - protocol: tcp
+          port_range_min: 5555
+          port_range_max: 5555
+        - protocol: tcp
+          port_range_min: 5000
+          port_range_max: 5000
+        - protocol: tcp
+          port_range_min: 3306
+          port_range_max: 3306
+        - protocol: tcp
+          port_range_min: 5672
+          port_range_max: 5672
+        - protocol: tcp
+          port_range_min: 22
+          port_range_max: 22
+  
   private_network:
     type: OS::Neutron::Net
-
+    properties:
+        name: { get_param: private_network_name }
+    
   private_subnet:
     type: OS::Neutron::Subnet
     properties:
+      name: { get_param: private_subnet_name }
       network_id: { get_resource: private_network }
-      cidr: 10.10.10.0/24
+      cidr: 10.10.9.0/24
+#      gateway_ip: 10.10.8.1
+#      allocation_pools: [ {start: 10.10.8.200, end: 10.10.8.350} ]
       dns_nameservers:
         - 130.238.164.6 
         - 130.238.4.133 
@@ -88,7 +98,7 @@ resources:
     type: OS::Neutron::Router
     properties:
       external_gateway_info:
-        network: { get_param: public_network }
+        network: { get_param: public_network_name }
 
   router-interface:
     type: OS::Neutron::RouterInterface
@@ -96,86 +106,73 @@ resources:
       router_id: { get_resource: router }
       subnet: { get_resource: private_subnet }
 
-  instance_port0:
+  master_port0:
     type: OS::Neutron::Port
     properties:
       network: { get_resource: private_network }
+#      fixed_ips: [{"subnet": { get_resource: private_subnet } , "ip_address": 10.10.12.4}]
       security_groups:
-        - { get_resource: team6_cluster }
-  instance_port1:
-    type: OS::Neutron::Port
-    properties:
-      network: { get_resource: private_network }
-      security_groups:
-        - { get_resource: team6_cluster }
- 
-  my_instance0:
+        - { get_resource: team6_cluster_group }
+        - { get_resource: team6_master_group }
+  
+  master:
     type: OS::Nova::Server
     properties:
+      name: team6_sparkmaster
       image: { get_param: image }
       flavor: { get_param: flavor }
       key_name: { get_param: key }
-      #security_groups:
-      #  - { get_resource: team6_cluster }
       networks:
-        - port: { get_resource: instance_port0 }         
+        - port: { get_resource: master_port0 }
       user_data: |
-        #!/bin/sh
-        echo "Hello, World!"
-        echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC7MO3V59P1dV0RVzyBtWr8v/N4ND9391MOl2Urv1G3qFx7kob0SLPnr4mpew9xDB+3ZzDPRlFts7eLeTiq4pWpwybeZ40KUnAHKttTli7uhAkBKpHYKMOH7WvuMuHYJjY$" >> /home/ubuntu/.ssh/authorized_keys
-        apt-add-repository -y ppa:ansible/ansible
-        apt-get update -y
-        apt-get upgrade -y
-        apt-get install -y ansible
+              #!/bin/bash
+              echo "Hello, World!"
+              echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC7MO3V59P1dV0RVzyBtWr8v/N4ND9391MOl2Urv1G3qFx7kob0SLPnr4mpew9xDB+3ZzDPRlFts7eLeTiq4pWpwybeZ40KUnAHKttTli7uhAkBKpHYKMOH7WvuMuHYJjY$" >> /home/ubuntu/.ssh/authorized_keys"
+              echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCenrHXp0Nk11TAenfB3Np0i6FngrJfcnivglBP3KSAOWqkC9dOBx/fmigdIWDkngyecpE2KId9JbeE9TjWjJrCmwSJUsFrBL82yWGip6ymb3QvyGygnHAZZySEyRokh1EAx+j+wadBt03AaaKHfdFZJf3nF42D8e3oMQsqgUQ1Br7O2dx+w9onbM1TRQ6nDw1G2z2e5y7uBdlhOfEjvCv7uOifOhpxAI6B1WP2+SiARGnMo4x2FDs3OKXld4nRD4uuhNp99xgH81S+8TY/8XrYUG/C1AvHDFhrEl2UVZ1/n7RIfgKYsZuRi2EfogC1bBer7MEOX0eWAuVYM2MUwMdh Generated-by-Nova" >> /home/ubuntu/.ssh/authorized_keys"
+              apt-add-repository -y ppa:ansible/ansible
+              apt-get update -y
+              apt-get upgrade -y
       user_data_format: RAW
 
-  my_instance1:
-    type: OS::Nova::Server
+  group_slaves:
+    type: OS::Heat::ResourceGroup
     properties:
-      image: { get_param: image }
-      flavor: { get_param: flavor }
-      key_name: { get_param: key }
-      #security_groups:
-      #  - { get_resource: team6_cluster }
-      networks:
-        - port: { get_resource: instance_port1 }
-      user_data: |
-        #!/bin/sh
-        echo "Hello, World!"
-        echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC7MO3V59P1dV0RVzyBtWr8v/N4ND9391MOl2Urv1G3qFx7kob0SLPnr4mpew9xDB+3ZzDPRlFts7eLeTiq4pWpwybeZ40KUnAHKttTli7uhAkBKpHYKMOH7WvuMuHYJjY$" >> /home/ubuntu/.ssh/authorized_keys
-        apt-get update -y
-        apt-get upgrade -y
-      user_data_format: RAW
-
+      count: {get_param: node_count}
+      resource_def:
+        type: OS::Nova::Server
+        properties:
+          name: team6_sparkworker%index% 
+          flavor: { get_param: flavor }
+          image: { get_param: image }
+          key_name: { get_param: key }
+          networks:
+            - network: { get_resource: private_network }
+          user_data: |
+            #!/bin/sh
+            echo "Hello, World!"
+            echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC7MO3V59P1dV0RVzyBtWr8v/N4ND9391MOl2Urv1G3qFx7kob0SLPnr4mpew9xDB+3ZzDPRlFts7eLeTiq4pWpwybeZ40KUnAHKttTli7uhAkBKpHYKMOH7WvuMuHYJjY$" >> /home/ubuntu/.ssh/authorized_keys"
+            echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCenrHXp0Nk11TAenfB3Np0i6FngrJfcnivglBP3KSAOWqkC9dOBx/fmigdIWDkngyecpE2KId9JbeE9TjWjJrCmwSJUsFrBL82yWGip6ymb3QvyGygnHAZZySEyRokh1EAx+j+wadBt03AaaKHfdFZJf3nF42D8e3oMQsqgUQ1Br7O2dx+w9onbM1TRQ6nDw1G2z2e5y7uBdlhOfEjvCv7uOifOhpxAI6B1WP2+SiARGnMo4x2FDs3OKXld4nRD4uuhNp99xgH81S+8TY/8XrYUG/C1AvHDFhrEl2UVZ1/n7RIfgKYsZuRi2EfogC1bBer7MEOX0eWAuVYM2MUwMdh Generated-by-Nova" >> /home/ubuntu/.ssh/authorized_keys"
+            apt-get update -y
+            apt-get upgrade -y
+          user_data_format: RAW
 
   floating_ip:
     type: OS::Neutron::FloatingIP
     properties:
-      floating_network: { get_param: public_network }
+      floating_network: { get_param: public_network_name }
 
   floating_ip_assoc:
     type: OS::Neutron::FloatingIPAssociation
     properties:
       floatingip_id: { get_resource: floating_ip }
-      port_id: { get_resource: instance_port0 } 
+      port_id: { get_resource: master_port0 } 
+
 
 # Output in case of successful booting
 outputs:
   instance_name:
     description: Name of the instance
-    value: { get_attr: [my_instance0, name] }
+    value: { get_attr: [master, name] }
   instance_ip:
     description: IP address of the instance
-    value: { get_attr: [my_instance0, first_address, floating_ip, floating_ip_address] }
-© 2019 GitHub, Inc.
-Terms
-Privacy
-Security
-Status
-Help
-Contact GitHub
-Pricing
-API
-Training
-Blog
-About
+    value: { get_attr: [master, first_address, floating_ip, floating_ip_address] }
