@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8"/>
+    <title>QTLaaS - Modify</title>
+    <link rel="stylesheet" type="text/css"
+          href="{{url_for('static', filename='style/test.css')}}"> 
+  </head>
+
+  <body>
+    <header>
+      <h1>Modify the stack</h1>
+    </header>
+
+    <nav>
+      <ul>
+        <li><a href="index">Home</a></li>
+        <li><a href="setup">Setup</a></li>
+        <li><a href="modify">Modify</a></li>x
+        <li><a href="terminate">Terminate</a></li>
+        <li><a href="about">About</a></li>
+      </ul>
+    </nav>
+
+    <main>
+
+      <p>Current workers: SHOW HERE</p>
+
+      <div class="form-group">
+        <input type="number" min="0" class="line-input"
+               name="numWorkers"
+               placeholder="Add workers">
+      </div>
+
+      <div class="form-group">
+        <input type="number" min="0" class="line-input"
+               name="removeWorkers"
+               placeholder="Remove Workers">
+      </div>
+
+      <div class="form-group">
+        <button type="submit"
+                class="btn btn-light text-primary btn-block"
+                style="margin : 20px 20px -10px 0px">Submit
+        </button>
+      </div>
+      
+      <form action="/QTL/run" method="POST">
+        <input type="submit" value="Submit">
+      </form>
+    </main>
+  </body>
+</html>
+
