@@ -1,139 +1,67 @@
-heat_template_version: 2016-10-14
+#
+# Deploying a network and a compute instance using Heat
+#
+heat_template_version: 2013-05-23
 
-description: Cluster for Qtl
+description: Deploying new master, and mutliple workers.
 
 parameters:
-  image:
+  key_name:
     type: string
-    label: Image name or ID
-    description: Image to be used for compute instance
-    default: dca488d5-ca09-458f-8983-898d3ddcfd2b
-
+    description: Name of an existing key pair to use for the server
+    default: team6key
+    constraints:
+      - custom_constraint: nova.keypair
   flavor:
     type: string
-    label: Flavor
-    description: Type of instance (flavor) to be used
+    description: Flavor for the server to be created
     default: ssc.small
-
-  key:
+    constraints:
+      - custom_constraint: nova.flavor
+  image:
     type: string
-    label: Key name
-    description: Name of key-pair to be used for compute instance
-    default: team6key
-
-  public_network_name:
-    type: string
-    label: Public network name or ID
-    description: Public network with floating IP addresses.
-    default: Public External IPv4 Network
-  
-  private_network_name:
-    type: string
-    label: Private network name or ID
-    description: Private network with internal IP addresses.
-    default: team6_private_network
+    description: Image ID or image name to use for the server
+    default: d0c8f522-ffc7-4224-907d-72145525904e
+    constraints:
+      - custom_constraint: glance.image
     
-  private_subnet_name:
+  net1:
     type: string
-    label: Private subnet name or ID
-    description: Private subnet with internal IP addresses.
-    default: team6_private_subnet
-
+    description: (existing) network for the server to be created
+    default: SNIC 2019/10-32 Internal IPv4 Network
+    constraints:
+      - custom_constraint: neutron.network
+      
+  net2:
+    type: string
+    description: (existing) network for the server to be created
+    default: SNIC 2019/10-32 Internal IPv4 Network
+    constraints:
+      - custom_constraint: neutron.network
+  
   node_count:
     type: number
     default: 4
     description: Default number of nodes
-    
-# Resource allocation
 resources:
-  team6_cluster_group:
-    type: OS::Neutron::SecurityGroup
-    properties:
-      name: team6_cluster_group
-      rules:
-        - protocol: tcp
-          port_range_min: 22
-          port_range_max: 22
-  team6_master_group:
-    type: OS::Neutron::SecurityGroup
-    properties:
-      name: team6_master_group
-      rules:
-        - protocol: tcp
-          port_range_min: 5555
-          port_range_max: 5555
-        - protocol: tcp
-          port_range_min: 5000
-          port_range_max: 5000
-        - protocol: tcp
-          port_range_min: 3306
-          port_range_max: 3306
-        - protocol: tcp
-          port_range_min: 5672
-          port_range_max: 5672
-        - protocol: tcp
-          port_range_min: 22
-          port_range_max: 22
-  
-  private_network:
-    type: OS::Neutron::Net
-    properties:
-        name: { get_param: private_network_name }
-    
-  private_subnet:
-    type: OS::Neutron::Subnet
-    properties:
-      name: { get_param: private_subnet_name }
-      network_id: { get_resource: private_network }
-      cidr: 10.10.9.0/24
-#      gateway_ip: 10.10.8.1
-#      allocation_pools: [ {start: 10.10.8.200, end: 10.10.8.350} ]
-      dns_nameservers:
-        - 130.238.164.6 
-        - 130.238.4.133 
-        - 130.238.7.10
-        - 130.239.1.90
-        - 129.16.1.53
-  router:
-    type: OS::Neutron::Router
-    properties:
-      external_gateway_info:
-        network: { get_param: public_network_name }
-
-  router-interface:
-    type: OS::Neutron::RouterInterface
-    properties:
-      router_id: { get_resource: router }
-      subnet: { get_resource: private_subnet }
-
-  master_port0:
-    type: OS::Neutron::Port
-    properties:
-      network: { get_resource: private_network }
-#      fixed_ips: [{"subnet": { get_resource: private_subnet } , "ip_address": 10.10.12.4}]
-      security_groups:
-        - { get_resource: team6_cluster_group }
-        - { get_resource: team6_master_group }
-  
-  master:
+ 
+  Master:
     type: OS::Nova::Server
     properties:
       name: team6_sparkmaster
+      key_name: { get_param: key_name }
       image: { get_param: image }
       flavor: { get_param: flavor }
-      key_name: { get_param: key }
       networks:
-        - port: { get_resource: master_port0 }
+        - network: {get_param: net1}
+ #       - network: {get_resource: private_net}
       user_data: |
-              #!/bin/bash
-              echo "Hello, World!"
-              echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC7MO3V59P1dV0RVzyBtWr8v/N4ND9391MOl2Urv1G3qFx7kob0SLPnr4mpew9xDB+3ZzDPRlFts7eLeTiq4pWpwybeZ40KUnAHKttTli7uhAkBKpHYKMOH7WvuMuHYJjY$" >> /home/ubuntu/.ssh/authorized_keys"
-              echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCenrHXp0Nk11TAenfB3Np0i6FngrJfcnivglBP3KSAOWqkC9dOBx/fmigdIWDkngyecpE2KId9JbeE9TjWjJrCmwSJUsFrBL82yWGip6ymb3QvyGygnHAZZySEyRokh1EAx+j+wadBt03AaaKHfdFZJf3nF42D8e3oMQsqgUQ1Br7O2dx+w9onbM1TRQ6nDw1G2z2e5y7uBdlhOfEjvCv7uOifOhpxAI6B1WP2+SiARGnMo4x2FDs3OKXld4nRD4uuhNp99xgH81S+8TY/8XrYUG/C1AvHDFhrEl2UVZ1/n7RIfgKYsZuRi2EfogC1bBer7MEOX0eWAuVYM2MUwMdh Generated-by-Nova" >> /home/ubuntu/.ssh/authorized_keys"
+            #!/bin/sh
+              echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC7MO3V59P1dV0RVzyBtWr8v/N4ND9391MOl2Urv1G3qFx7kob0SLPnr4mpew9xDB+3ZzDPRlFts7eLeTiq4pWpwybeZ40KUnAHKttTli7uhAkBKpHYKMOH7WvuMuHYJjY416KfBj2XulpDdS9Jtue/sWOKDZEF+iP1X6wcIuDDd3WAj5dQ7y+IGmFxgGR4U9/tTgnfVL4scVJKu8M9igHyisHNdr7qDi7Z8yhd4sg/b1EFJ6vmirCjKWWgwprhtmxvhZLjnpTxwzwrccztO9wdlj84L61VFAzKvdIc1nwdNJv3AXVzY38LCjdYqSaaiobZtzKfD+/Ryh6k+PSdLqGB ubuntu@team6ansiblehost" >> /home/ubuntu/.ssh/authorized_keys
               apt-add-repository -y ppa:ansible/ansible
               apt-get update -y
               apt-get upgrade -y
       user_data_format: RAW
-
   group_slaves:
     type: OS::Heat::ResourceGroup
     properties:
@@ -144,35 +72,16 @@ resources:
           name: team6_sparkworker%index% 
           flavor: { get_param: flavor }
           image: { get_param: image }
-          key_name: { get_param: key }
+          key_name: { get_param: key_name }
           networks:
-            - network: { get_resource: private_network }
+            - network: { get_param: net1 }
           user_data: |
             #!/bin/sh
-            echo "Hello, World!"
-            echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC7MO3V59P1dV0RVzyBtWr8v/N4ND9391MOl2Urv1G3qFx7kob0SLPnr4mpew9xDB+3ZzDPRlFts7eLeTiq4pWpwybeZ40KUnAHKttTli7uhAkBKpHYKMOH7WvuMuHYJjY$" >> /home/ubuntu/.ssh/authorized_keys"
-            echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCenrHXp0Nk11TAenfB3Np0i6FngrJfcnivglBP3KSAOWqkC9dOBx/fmigdIWDkngyecpE2KId9JbeE9TjWjJrCmwSJUsFrBL82yWGip6ymb3QvyGygnHAZZySEyRokh1EAx+j+wadBt03AaaKHfdFZJf3nF42D8e3oMQsqgUQ1Br7O2dx+w9onbM1TRQ6nDw1G2z2e5y7uBdlhOfEjvCv7uOifOhpxAI6B1WP2+SiARGnMo4x2FDs3OKXld4nRD4uuhNp99xgH81S+8TY/8XrYUG/C1AvHDFhrEl2UVZ1/n7RIfgKYsZuRi2EfogC1bBer7MEOX0eWAuVYM2MUwMdh Generated-by-Nova" >> /home/ubuntu/.ssh/authorized_keys"
+            echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC7MO3V59P1dV0RVzyBtWr8v/N4ND9391MOl2Urv1G3qFx7kob0SLPnr4mpew9xDB+3ZzDPRlFts7eLeTiq4pWpwybeZ40KUnAHKttTli7uhAkBKpHYKMOH7WvuMuHYJjY416KfBj2XulpDdS9Jtue/sWOKDZEF+iP1X6wcIuDDd3WAj5dQ7y+IGmFxgGR4U9/tTgnfVL4scVJKu8M9igHyisHNdr7qDi7Z8yhd4sg/b1EFJ6vmirCjKWWgwprhtmxvhZLjnpTxwzwrccztO9wdlj84L61VFAzKvdIc1nwdNJv3AXVzY38LCjdYqSaaiobZtzKfD+/Ryh6k+PSdLqGB ubuntu@team6ansiblehost" >> /home/ubuntu/.ssh/authorized_keys
             apt-get update -y
             apt-get upgrade -y
           user_data_format: RAW
-
-  floating_ip:
-    type: OS::Neutron::FloatingIP
-    properties:
-      floating_network: { get_param: public_network_name }
-
-  floating_ip_assoc:
-    type: OS::Neutron::FloatingIPAssociation
-    properties:
-      floatingip_id: { get_resource: floating_ip }
-      port_id: { get_resource: master_port0 } 
-
-
-# Output in case of successful booting
 outputs:
-  instance_name:
-    description: Name of the instance
-    value: { get_attr: [master, name] }
-  instance_ip:
-    description: IP address of the instance
-    value: { get_attr: [master, first_address, floating_ip, floating_ip_address] }
+  server_networks:
+    description: The networks of the deployed server
+    value: { get_attr: [Master, networks] }
