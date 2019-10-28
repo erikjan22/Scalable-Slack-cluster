@@ -10,7 +10,7 @@ def form_post():
     if request.method == 'POST':
         num_workers = request.form['numWorkers']
         return num_workers
-    return render_template('form_qtl.html')
+    return render_template('setup.html')
 
 
 @app.route('/QTL/index')
@@ -23,8 +23,8 @@ def about():
     return render_template('about.html')
 
 
-@app.route('/QTL/set_workers', methods=['GET', 'POST'])
-def set_workers():
+@app.route('/QTL/setup', methods=['GET', 'POST'])
+def start_instance():
     """                                                    
     Set up how many workers to use
     TODO: Start the cluster from here
@@ -40,23 +40,29 @@ def set_workers():
 
             with open(heat_template, 'w') as f:
                 yaml.dump(list_doc, f, default_flow_style=False)
-    return render_template('form_qtl.html')
 
-
-@app.route('/QTL/run', methods=['GET', 'POST'])
-def start_workers():
-    """                                                                               
-    Start the stack of workers
-    # TODO: test with openstack on ansible host
-    """
-    #cmd = "openstack stack create team6_v2 -f 'yaml' -t 'Heat_v6_test.yml'"
-    cmd = "ls -al" # placeholder
-    if request.method == 'POST':
+        cmd = "ls -l"
+        #cmd = "openstack stack create team6_v2 -f 'yaml' -t 'Heat_v6_test.yml'"
         process = subprocess.Popen(cmd.split(), stdout=subprocess.PIPE)
         output, error = process.communicate()
-        return output, error
-    print('Cluster starting')
-    return render_template('run_qtl.html')
+        return "Starting instance", output, error
+    return render_template('setup.html')
+
+
+
+@app.route('/QTL/modify', methods=['GET', 'POST'])
+def modify_workers():
+    """
+    Modify workers, adding or removing from the stack
+    """
+    return render_template('modify.html')
+
+@app.route('/QTL/terminate', methods=['GET', 'POST'])
+def terminate_instance():
+    """
+    Remove the stack
+    """
+    return render_template('terminate.html')
 
 
 if __name__ == '__main__':
