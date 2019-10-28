@@ -1,6 +1,8 @@
 import subprocess
 from ruamel import yaml
-from flask import Flask, request, render_template
+from flask import Flask, request, render_template, g, jsonify, Response
+import json
+import shelve # For temporary storage
 
 import os
 import sys
@@ -36,6 +38,20 @@ auth = loader.load_from_options(auth_url=env['OS_AUTH_URL'],
                                 project_id=env['OS_PROJECT_ID'],
                                 user_domain_name=env['OS_USER_DOMAIN_NAME'])
 
+sess = session.Session(auth=auth)
+nova = client.Client('2.1', session=sess)
+glance = glclient.Client('2.1', session=sess)
+
+workers_list = []
+master = {}
+
+worker_name = "team6_sparkworker"
+master_name = "team6_sparkmaster"
+ansible = {"name": "ansible-node", "ip": "192.168.1.9"}
+ansible_host = " ansible_ssh_host="
+prefix = "team6_"
+
+PATH = os.path.abspath("/etc/")
 
 app = Flask(__name__)
 
@@ -62,8 +78,13 @@ def about():
 def start_instance():
     """                                                    
     Set up how many workers to use
-    TODO: Start the cluster from here
     """
+
+    global workers_list
+    global ansible
+    global master 
+
+    # Modifies the Heat templates with number of workers and start the stack
     heat_template = 'Heat_test.yml'
     #if request.method == 'POST':
         #workers = request.form['numWorkers']
@@ -84,19 +105,73 @@ def start_instance():
         
         process = subprocess.Popen(cmd, stdout=subprocess.PIPE)
         output, error = process.communicate()
-        
-        return "Starting instance", output, error
-    #return render_template('setup.html')
-    return 'Starting' #output, error
 
+    # def find_all_instances():
+
+    time.sleep(60)
+    relevant_instances = nova.servers.list(search_opts={"name": prefix})
+
+    # Fix this instead of time.sleep(60)
+    #not_ready = True
+    #num_ready = 0
+    #while (num_ready != int(workers)):
+    #    for instance in relevant_instances:
+    #        print(num_ready)
+    #        if (instance.status == "ACTIVE"):
+    #            num_ready += 1
+    #        else:
+    #            num_ready = 0
+    #            # if the instance not active, wait 5 seconds
+    #            time.sleep(5)
+    
+
+    # Finds the relevant instances, aka workers
+    for instance in relevant_instances:
+        if (instance.status != "ACTIVE"):
+            # if the instance not active, wait 5 seconds
+            time.sleep(5)
+        try:
+            ip = instance.networks[private_net][0]
+            name = instance.name
+            status = instance.status
+            print(status)
+            if worker_name in name:
+                print("Worker ", name, "Has IP ", ip)
+                id_nr = int(name.strip(worker_name))
+                if id_nr > 0:
+                    workers_list.append({"name": name.strip(prefix), "ip": ip})
+                else:
+                    master = {"name": name.strip(prefix), "ip": ip}
+                    print("Master ", name, "HAS ip ", ip)
+        except:
+            pass
+        print("Got Instances")
+    print("Worker list: ", workers_list)
+    print("Master: ", master)
+
+
+    # Write to host files
+    time.sleep(30)
+    write_to_ansible_host(ansible, master, workers_list)
+    
+    return "Started\n"
+        
 
 @app.route('/QTL/modify', methods=['GET', 'POST'])
 def modify_workers():
     """
     Modify workers, adding or removing from the stack
-    """
+    """    
     return render_template('modify.html')
 
+
+@app.route('/QTL/stack')
+def show_stack():
+    """
+    Shows workers in stack
+    """
+    #return Response(json.dumps(workers_list), mimetype='application/json')
+    return jsonify(workers_list)
 
 @app.route('/QTL/terminate', methods=['GET', 'POST'])
 def terminate_instance():
@@ -106,5 +181,84 @@ def terminate_instance():
     return render_template('terminate.html')
 
 
+#m = {"name": "hej", "ip": "1292"}
+#a = m
+#w = [m]
+
+# Takes in ansible, master, worker
+def write_to_ansible_host(a, m, w):
+    proceed = True
+    if (len(a) * len(m) * len(w) ) == 0:
+        proceed = False
+    if proceed:
+        # Open /etc/hosts
+        with open(PATH+"/hosts", "w") as f:
+            f.writelines(a["ip"] + " " + a["name"] + "\n")
+            f.writelines(m["ip"] + " " + m["name"] + "\n")
+            for i in range(len(w)):
+                # Get number of spark workers
+                tmp_num = int(w[i]["name"].split("sparkworker", 1)[1])
+                if (tmp_num > 0):
+                    f.writelines(w[i]["ip"] + " " + w[i]["name"] + "\n")
+
+            # The following lines are desirable for IPv6 capable
+            f.writelines("\n::1 ip6-localhost ip6-loopback\n")
+            f.writelines("fe00::0 ip6-localnet\n")
+            f.writelines("ff00::0 ip6-mcastprefix\n")
+            f.writelines("ff02::1 ip6-allnodes\n")
+            f.writelines("ff02::2 ip6-allrouters\n")
+            f.writelines("ff02::3 ip6-allhosts\n")
+            f.writelines("192.168.1.9 ansible-node\n")
+
+        print("Wrote to etc/hosts")
+        f.close()
+
+        # Open /etc/ansible/hosts
+        ansible_conn = " ansible_connection=local ansible_user=ubuntu"
+        master_conn  = " ansible_connection=ssh ansible_user=ubuntu"
+        worker_conn  = " ansible_connection=ssh ansible_user=ubuntu"
+        ansible_host = " ansible_ssh_host="
+        with open(PATH+"/ansible/hosts", "w") as f:
+            f.writelines(a["name"] + ansible_host + a["ip"] + "\n")
+            f.writelines(m["name"] + ansible_host + m["ip"] + "\n")
+            for i in range(len(w)):
+                tmp_num = int(w[i]["name"].split("sparkworker", 1)[1])
+                if (tmp_num > 0):
+                    f.writelines(w[i]["name"] + ansible_host + w[i]["ip"] + "\n")
+                
+            # Write ansible config
+            f.writelines("\n" + "[configNode]" + "\n")
+            f.writelines(a["name"] + ansible_conn + "\n")
+            
+            # Write sparkMaster
+            f.writelines("\n" + "[sparkmaster]" + "\n")
+            f.writelines(m["name"] + master_conn + "\n")
+            
+            # Write sparkWorker
+            f.writelines("\n" + "[sparkworker]" + "\n")
+            for i in range(len(w)):
+                f.writelines(w[i]["name"] + worker_conn + "\n")
+
+        print("Wrote to /etc/ansible/hosts")
+        f.close()        
+    else:
+        print("Failed to write to files...")
+        print("Not enough workers or masters were found!")
+
+
+def run_ansible():
+
+    PATH = os.path.abspath('/home/ubuntu/QTLaaS/')
+    #PATH_home = os.path.abspath('/home/ubuntu/ACC-grp6/')
+    cmd = "ansible-playbook -b ../QTLaaS/spark_deployment.yml"
+    process = subprocess.Popen(cmd.split(), stdout=subprocess.PIPE)
+    output, error = process.communicate()
+    
+run_ansible()
+    
+        
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)
+
+
+
