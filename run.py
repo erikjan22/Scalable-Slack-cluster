@@ -102,17 +102,23 @@ def start_instance():
         with open(heat_template, 'w') as f:
             yaml.dump(list_doc, f, default_flow_style=False)
 
-        
+        # Create stack
         cmd = ["openstack", "stack", "create",
-               "team6_api", "-f", "yaml", "-t", "Heat_test.yml"]
+               "team6_api", "-f", "yaml", "-t", "Heat.yml"]
         
         
         process = subprocess.Popen(cmd, stdout=subprocess.PIPE)
         output, error = process.communicate()
 
-        
+
+    # Remove all IP addresses in  ~/.ssh/known_hosts
+    cmd = ["truncate", "-s", "0", "../.ssh/known_hosts"]
+    process = subprocess.Popen(cmd, stdout=subprocess.PIPE)
+    output, error = process.communicate()
+
+    
     # Find instances for NOVA
-    time.sleep(60)
+    time.sleep(180)
     relevant_instances = nova.servers.list(search_opts={"name": prefix})
 
     # Fix this instead of time.sleep(60)
@@ -265,8 +271,7 @@ def modify_workers():
     write_to_ansible_host(ansible, master, workers_list)
     print("Wrote to Ansible\n")
 
-    # 
-    time.sleep(30)
+    time.sleep(10)
     run_ansible()
     print("=================")
     print("Launched Ansible")
@@ -304,6 +309,8 @@ def terminate_instance():
     Remove the stack
     """
     return render_template('terminate.html')
+
+
 
 
 
@@ -374,19 +381,22 @@ def write_to_ansible_host(a, m, w):
 
 
 def run_ansible():
-
-    PATH = os.path.abspath('/home/ubuntu/QTLaaS/')
-    #PATH_home = os.path.abspath('/home/ubuntu/ACC-grp6/')
-    cmd = "ansible-playbook -b ../QTLaaS/spark_deployment.yml"
+    # Change user privilage and run ansible 
+    cmd = "sudo -u ubuntu ansible-playbook -b ../QTLaaS/spark_deployment.yml"
     process = subprocess.Popen(cmd.split(), stdout=subprocess.PIPE)
     output, error = process.communicate()
     return output, error
-    
-#run_ansible()
-#print("\n\n=========================================\n")
-#print("Done with Ansible!")
 
 
+
+@app.route('/QTL/ansible')
+def ansible_r():
+    # Change user privilage and run ansible installation
+    cmd = "sudo -u ubuntu ansible-playbook -b ../QTLaaS/spark_deployment.yml"
+    process = subprocess.Popen(cmd.split(), stdout=subprocess.PIPE)
+    output, error = process.communicate()
+    print()
+    return "Done with Ansible"
 
 
 if __name__ == '__main__':

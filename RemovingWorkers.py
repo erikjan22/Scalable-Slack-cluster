@@ -12,17 +12,10 @@ from keystoneauth1 import loading
 from keystoneauth1 import session
 import glanceclient.v2.client as glclient
 
+PATH = os.path.abspath("/etc/")
 
 ### USER INPUT ###
-NrOfRemovals = 2 # This value should be given by the user. Number of workers to be removed.
-
-
-### FILES - TO BE CHANGED IN FINAL VERSION ###
-Read_file_name = "example-ansiblehosts-file"
-Write_file_name = "New-example-ansiblehosts-file"
-
-Read_file_name_2 = "example-normalhosts-file"
-Write_file_name_2 = "New-example-normalhosts-file"
+NrOfRemovals = 1 # This value should be given by the user. Number of workers to be removed.
 
 
 ### ADJUSTING THE ANSIBLE HOSTS FILE ###
@@ -30,7 +23,7 @@ Write_file_name_2 = "New-example-normalhosts-file"
 StorageStrings = [] # Temporary storage
 
 # Read File
-with open(Read_file_name) as f:
+with open(PATH + "/ansible/hosts") as f:
 	lines = f.readlines()
 	# Count how many workers there are.
 	NrOfWorkers = 0
@@ -63,13 +56,13 @@ with open(Read_file_name) as f:
 				PassedMidPoint = True
 
 # Write the correct lines to the new file:
-with open(Write_file_name, "w") as f1:
+with open(PATH + "/ansible/hosts", "w") as f1:
 	for line in StorageStrings:
 		f1.write(line)
 
 # make file executable
-st = os.stat(Write_file_name)
-os.chmod(Write_file_name, st.st_mode | stat.S_IEXEC)
+#st = os.stat(PATH + "/ansible/hosts")
+#os.chmod(PATH + "/ansible/hosts", st.st_mode | stat.S_IEXEC)
 
 
 
@@ -79,7 +72,7 @@ StorageStrings = [] # Make it empty again.
 RemovedMachines = {} # Add the details of the machines which have been removed.
 
 # Read File
-with open(Read_file_name_2) as f:
+with open(PATH + "/hosts") as f:
 	lines = f.readlines()
 
 	NewNrOfWorkers = 0 # This represents how many workers there are supposed to be
@@ -99,13 +92,13 @@ with open(Read_file_name_2) as f:
 			StorageStrings.append(line)
 
 # Write the correct lines to the new file:
-with open(Write_file_name_2, "w") as f1:
+with open(PATH + "/hosts", "w") as f1:
 	for line in StorageStrings:
 		f1.write(line)
 
 # make file executable
-st = os.stat(Write_file_name_2)
-os.chmod(Write_file_name_2, st.st_mode | stat.S_IEXEC)
+#st = os.stat(PATH + "/hosts")
+#os.chmod(PATH + "/hosts", st.st_mode | stat.S_IEXEC)
 
 
 
