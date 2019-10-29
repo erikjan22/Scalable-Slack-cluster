@@ -89,7 +89,7 @@ def start_instance():
     global master 
 
     # Modifies the Heat templates with number of workers and start the stack
-    heat_template = 'Heat_test.yml'
+    heat_template = 'Heat.yml'
     #if request.method == 'POST':
         #workers = request.form['numWorkers']
     workers = request.args.get('workers')
@@ -180,8 +180,101 @@ def start_instance():
 def modify_workers():
     """
     Modify workers, adding or removing from the stack
-    """    
-    return render_template('modify.html')
+    """
+
+    global workers_list
+    global ansible
+    global master 
+
+    # Modifies the Heat templates with number
+    heat_template = 'Heat.yml'
+    #if request.method == 'POST':
+        #workers = request.form['numWorkers']
+    workers = request.args.get('workers')
+    with open(heat_template) as f:
+        list_doc = yaml.safe_load(f)
+        parameters = list_doc['parameters']
+        node_count = parameters['node_count']
+        list_doc['parameters']['node_count']['default'] = int(workers)
+        
+        with open(heat_template, 'w') as f:
+            yaml.dump(list_doc, f, default_flow_style=False)
+
+        
+        cmd = ["openstack", "stack", "create",
+               "team6_api", "-f", "yaml", "-t", "Heat_test.yml"]
+        
+        
+        process = subprocess.Popen(cmd, stdout=subprocess.PIPE)
+        output, error = process.communicate()
+
+        
+    # Find instances for NOVA
+    time.sleep(60)
+    relevant_instances = nova.servers.list(search_opts={"name": prefix})
+
+    # Fix this instead of time.sleep(60)
+    #not_ready = True
+    #num_ready = 0
+    #while (num_ready != int(workers)):
+    #    for instance in relevant_instances:
+    #        print(num_ready)
+    #        if (instance.status == "ACTIVE"):
+    #            num_ready += 1
+    #        else:
+    #            num_ready = 0
+    #            # if the instance not active, wait 5 seconds
+    #            time.sleep(5)
+    
+
+    # Finds the relevant instances, aka workers
+    for instance in relevant_instances:
+        if (instance.status != "ACTIVE"):
+            # if the instance not active, wait 5 seconds
+            time.sleep(5)
+        try:
+            ip = instance.networks[private_net][0]
+            name = instance.name
+            status = instance.status
+            print("Name: ", name)
+            print("IP: ", ip)
+            
+            if worker_name in name:
+                #print("Worker ", name)
+                #print("Has IP ", ip)
+                id_nr = int(name.strip(worker_name))
+                if id_nr > 0:
+                    workers_list.append({"name": name.strip(prefix), "ip": ip})        
+            else:
+                master = {"name": name.strip(prefix), "ip": ip}
+                #print("Master ", name)
+                #print("HAS IP ", ip)
+
+        except:
+            pass
+
+    print(workers_list)
+    print(master)
+    print("")
+    print("Got Instances")
+    print("")
+
+    
+    # Write to host files
+    time.sleep(30)
+    write_to_ansible_host(ansible, master, workers_list)
+    print("Wrote to Ansible\n")
+
+    # 
+    time.sleep(30)
+    run_ansible()
+    print("=================")
+    print("Launched Ansible")
+    
+    return "Started\n"
+
+    
+    #return render_template('modify.html')
 
 
 @app.route('/QTL/delete')
