@@ -12,21 +12,13 @@ parameters:
     default: team6key
     constraints:
       - custom_constraint: nova.keypair
-  
   flavor:
     type: string
     description: Flavor for the server to be created
     default: ssc.small
     constraints:
       - custom_constraint: nova.flavor
-  
- # security_group:
- #   type: string
- #   description: ID of security group for this instance port
- #   default: BootsmaSG
- #   constraints:
- #     - custom_constraint: neutron.security_group
-    
+
   image:
     type: string
     description: Image ID or image name to use for the server
@@ -47,27 +39,7 @@ parameters:
     description: Default number of nodes
 resources:
  
-  # team6_security_group:
-    # type: OS::Neutron::SecurityGroup
-    # properties:
-      # name: team6_security_group
-      # rules:
-        # - protocol: tcp
-          # port_range_min: 5555
-          # port_range_max: 5555
-        # - protocol: tcp
-          # port_range_min: 5000
-          # port_range_max: 5000
-        # - protocol: tcp
-          # port_range_min: 3306
-          # port_range_max: 3306
-        # - protocol: tcp
-          # port_range_min: 5672
-          # port_range_max: 5672
-        # - protocol: tcp
-          # port_range_min: 22
-          # port_range_max: 22
-          
+
   Master:
     type: OS::Nova::Server
     properties:
@@ -75,11 +47,10 @@ resources:
       key_name: { get_param: key_name }
       image: { get_param: image }
       flavor: { get_param: flavor }
- #     security_group:{ get_param: security_group }
+
       networks:
         - network: {get_param: net1}
       security_groups: [team6]
- #       - network: {get_resource: private_net}
       user_data: |
             #!/bin/sh
               echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC7MO3V59P1dV0RVzyBtWr8v/N4ND9391MOl2Urv1G3qFx7kob0SLPnr4mpew9xDB+3ZzDPRlFts7eLeTiq4pWpwybeZ40KUnAHKttTli7uhAkBKpHYKMOH7WvuMuHYJjY416KfBj2XulpDdS9Jtue/sWOKDZEF+iP1X6wcIuDDd3WAj5dQ7y+IGmFxgGR4U9/tTgnfVL4scVJKu8M9igHyisHNdr7qDi7Z8yhd4sg/b1EFJ6vmirCjKWWgwprhtmxvhZLjnpTxwzwrccztO9wdlj84L61VFAzKvdIc1nwdNJv3AXVzY38LCjdYqSaaiobZtzKfD+/Ryh6k+PSdLqGB ubuntu@team6ansiblehost" >> /home/ubuntu/.ssh/authorized_keys
@@ -87,7 +58,7 @@ resources:
               apt-get update -y
               apt-get upgrade -y
       user_data_format: RAW
- 
+
   group_slaves:
     type: OS::Heat::ResourceGroup
     properties:
@@ -109,13 +80,6 @@ resources:
             apt-get update -y
             apt-get upgrade -y
           user_data_format: RAW
-     
-  # association:
-    # type: OS::Nova::FloatingIPAssociation
-    # properties:
-      # floating_ip: { get_param: net1 }
-      # server_id: { get_resource: Master }
-      
 outputs:
   server_networks:
     description: The networks of the deployed server
