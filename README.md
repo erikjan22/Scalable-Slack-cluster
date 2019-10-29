@@ -1,6 +1,14 @@
 # ACC-grp6
 QTL as a service (QTLaaS), a cloud service for genetic analysis
 
+### Setup  
+In order to run the service one first need to create a instance and using super user privalage do the following: 
+1. Clone the repo `https://github.com/QTLaaS/QTLaaS.git` to the home directory on the instance 
+2. Clone the repo `https://github.com/MrHed/ACC-grp6.git` to the home directory of the instance
+  
+
+
+
 To run the Flask app:
 * `curl -i http://0.0.0.0:5000/QTL/setup?workers=NUM`  
 
