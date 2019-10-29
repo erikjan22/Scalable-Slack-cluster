@@ -16,6 +16,10 @@ from keystoneauth1 import session
 import glanceclient.v2.client as glclient
 
 # Setting up logging parameters
+#cmd = ["source", "SNIC.sh"]
+#process = subprocess.Popen(cmd, stdout=subprocess.PIPE)
+#output, error = process.communicate()
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -106,8 +110,8 @@ def start_instance():
         process = subprocess.Popen(cmd, stdout=subprocess.PIPE)
         output, error = process.communicate()
 
-    # def find_all_instances():
-
+        
+    # Find instances for NOVA
     time.sleep(60)
     relevant_instances = nova.servers.list(search_opts={"name": prefix})
 
@@ -134,25 +138,40 @@ def start_instance():
             ip = instance.networks[private_net][0]
             name = instance.name
             status = instance.status
-            print(status)
+            print("Name: ", name)
+            print("IP: ", ip)
+            
             if worker_name in name:
-                print("Worker ", name, "Has IP ", ip)
+                #print("Worker ", name)
+                #print("Has IP ", ip)
                 id_nr = int(name.strip(worker_name))
                 if id_nr > 0:
-                    workers_list.append({"name": name.strip(prefix), "ip": ip})
-                else:
-                    master = {"name": name.strip(prefix), "ip": ip}
-                    print("Master ", name, "HAS ip ", ip)
+                    workers_list.append({"name": name.strip(prefix), "ip": ip})        
+            else:
+                master = {"name": name.strip(prefix), "ip": ip}
+                #print("Master ", name)
+                #print("HAS IP ", ip)
+
         except:
             pass
-        print("Got Instances")
-    print("Worker list: ", workers_list)
-    print("Master: ", master)
 
+    print(workers_list)
+    print(master)
+    print("")
+    print("Got Instances")
+    print("")
 
+    
     # Write to host files
     time.sleep(30)
     write_to_ansible_host(ansible, master, workers_list)
+    print("Wrote to Ansible\n")
+
+    # 
+    time.sleep(30)
+    run_ansible()
+    print("=================")
+    print("Launched Ansible")
     
     return "Started\n"
         
@@ -165,6 +184,18 @@ def modify_workers():
     return render_template('modify.html')
 
 
+@app.route('/QTL/delete')
+def delete_stack():
+    """
+    Delete entire stack 
+    """
+    stack_name = "team6_api"
+    cmd = "openstack stack delete team6_api -y"
+    process = subprocess.Popen(cmd.split(), stdout=subprocess.PIPE)
+    output, error = process.communicate()
+    return "Deleting Stack\n"
+    
+
 @app.route('/QTL/stack')
 def show_stack():
     """
@@ -173,12 +204,14 @@ def show_stack():
     #return Response(json.dumps(workers_list), mimetype='application/json')
     return jsonify(workers_list)
 
+
 @app.route('/QTL/terminate', methods=['GET', 'POST'])
 def terminate_instance():
     """
     Remove the stack
     """
     return render_template('terminate.html')
+
 
 
 #m = {"name": "hej", "ip": "1292"}
@@ -246,6 +279,7 @@ def write_to_ansible_host(a, m, w):
         print("Not enough workers or masters were found!")
 
 
+
 def run_ansible():
 
     PATH = os.path.abspath('/home/ubuntu/QTLaaS/')
@@ -253,10 +287,15 @@ def run_ansible():
     cmd = "ansible-playbook -b ../QTLaaS/spark_deployment.yml"
     process = subprocess.Popen(cmd.split(), stdout=subprocess.PIPE)
     output, error = process.communicate()
+    return output, error
     
-run_ansible()
-    
-        
+#run_ansible()
+#print("\n\n=========================================\n")
+#print("Done with Ansible!")
+
+
+
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)
 
