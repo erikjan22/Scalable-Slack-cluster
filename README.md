@@ -18,6 +18,6 @@ where `NUM` is the number of workers to start the instance with. This will run t
 Other possible commands are  
 * `curl -i http://0.0.0.0:5000/QTL/modify`
 * `curl -i http://0.0.0.0:5000/QTL/stack`
-* `curl -i http://0.0.0.0:5000/QTL/delete_stack`
+* `curl -i http://0.0.0.0:5000/QTL/delete`
 
 The modify command lets the user specify how many users to add to the stack. The stack command show how many workers there currently are on the stack, and the delete stack command terminates the cluster. 
