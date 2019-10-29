@@ -3,7 +3,7 @@
 #
 heat_template_version: 2013-05-23
 
-description: Deploying new master, and mutliple workers.
+description: Deploying new workers.
 
 parameters:
   key_name:
@@ -18,7 +18,6 @@ parameters:
     default: ssc.small
     constraints:
       - custom_constraint: nova.flavor
-
   image:
     type: string
     description: Image ID or image name to use for the server
@@ -32,33 +31,32 @@ parameters:
     default: SNIC 2019/10-32 Internal IPv4 Network
     constraints:
       - custom_constraint: neutron.network
-  
+      
   node_count:
     type: number
     default: 4
     description: Default number of nodes
 resources:
  
-
-  Master:
-    type: OS::Nova::Server
-    properties:
-      name: team6_sparkmaster
-      key_name: { get_param: key_name }
-      image: { get_param: image }
-      flavor: { get_param: flavor }
-
-      networks:
-        - network: {get_param: net1}
-      security_groups: [team6]
-      user_data: |
-            #!/bin/sh
-              echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC7MO3V59P1dV0RVzyBtWr8v/N4ND9391MOl2Urv1G3qFx7kob0SLPnr4mpew9xDB+3ZzDPRlFts7eLeTiq4pWpwybeZ40KUnAHKttTli7uhAkBKpHYKMOH7WvuMuHYJjY416KfBj2XulpDdS9Jtue/sWOKDZEF+iP1X6wcIuDDd3WAj5dQ7y+IGmFxgGR4U9/tTgnfVL4scVJKu8M9igHyisHNdr7qDi7Z8yhd4sg/b1EFJ6vmirCjKWWgwprhtmxvhZLjnpTxwzwrccztO9wdlj84L61VFAzKvdIc1nwdNJv3AXVzY38LCjdYqSaaiobZtzKfD+/Ryh6k+PSdLqGB ubuntu@team6ansiblehost" >> /home/ubuntu/.ssh/authorized_keys
-              apt-add-repository -y ppa:ansible/ansible
-              apt-get update -y
-              apt-get upgrade -y
-      user_data_format: RAW
-
+  # Master:
+    # type: OS::Nova::Server
+    # properties:
+      # name: team6_sparkmaster
+      # key_name: { get_param: key_name }
+      # image: { get_param: image }
+      # flavor: { get_param: flavor }
+      # networks:
+        # - network: {get_param: net1}
+ # #       - network: {get_resource: private_net}
+      # user_data: |
+            # #!/bin/sh
+            # echo "Hello, World!" >> /home/ubuntu/.ssh/authorized_keys
+              # echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC7MO3V59P1dV0RVzyBtWr8v/N4ND9391MOl2Urv1G3qFx7kob0SLPnr4mpew9xDB+3ZzDPRlFts7eLeTiq4pWpwybeZ40KUnAHKttTli7uhAkBKpHYKMOH7WvuMuHYJjY416KfBj2XulpDdS9Jtue/sWOKDZEF+iP1X6wcIuDDd3WAj5dQ7y+IGmFxgGR4U9/tTgnfVL4scVJKu8M9igHyisHNdr7qDi7Z8yhd4sg/b1EFJ6vmirCjKWWgwprhtmxvhZLjnpTxwzwrccztO9wdlj84L61VFAzKvdIc1nwdNJv3AXVzY38LCjdYqSaaiobZtzKfD+/Ryh6k+PSdLqGB ubuntu@team6ansiblehost" >> /home/ubuntu/.ssh/authorized_keys
+              # echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCenrHXp0Nk11TAenfB3Np0i6FngrJfcnivglBP3KSAOWqkC9dOBx/fmigdIWDkngyecpE2KId9JbeE9TjWjJrCmwSJUsFrBL82yWGip6ymb3QvyGygnHAZZySEyRokh1EAx+j+wadBt03AaaKHfdFZJf3nF42D8e3oMQsqgUQ1Br7O2dx+w9onbM1TRQ6nDw1G2z2e5y7uBdlhOfEjvCv7uOifOhpxAI6B1WP2+SiARGnMo4x2FDs3OKXld4nRD4uuhNp99xgH81S+8TY/8XrYUG/C1AvHDFhrEl2UVZ1/n7RIfgKYsZuRi2EfogC1bBer7MEOX0eWAuVYM2MUwMdh Generated-by-Nova" >> /home/ubuntu/.ssh/authorized_keys
+              # apt-add-repository -y ppa:ansible/ansible
+              # apt-get update -y
+              # apt-get upgrade -y
+      # user_data_format: RAW
   group_slaves:
     type: OS::Heat::ResourceGroup
     properties:
@@ -67,12 +65,12 @@ resources:
       resource_def:
         type: OS::Nova::Server
         properties:
-          name: team6_sparkworker%index% 
+          name: team6_additional_sparkworker%index% 
           flavor: { get_param: flavor }
           image: { get_param: image }
           key_name: { get_param: key_name }
           networks:
-            - network: { get_param: net1}
+            - network: { get_param: net1 }
           security_groups: [team6]
           user_data: |
             #!/bin/sh
@@ -83,4 +81,4 @@ resources:
 outputs:
   server_networks:
     description: The networks of the deployed server
-    value: { get_attr: [Master, networks] }
+    value: { get_attr: [group_slaves, networks] }
