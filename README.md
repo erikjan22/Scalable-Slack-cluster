@@ -1,12 +1,13 @@
 # ACC-grp6
 QTL as a service (QTLaaS), a cloud service for genetic analysis
 
-### Setup  
+### Setup and run REST API 
 In order to run the service one first need to create a instance and using super user privalage do the following: 
 1. Clone the repo `https://github.com/QTLaaS/QTLaaS.git` to the home directory on the instance 
-2. Clone the repo `https://github.com/MrHed/ACC-grp6.git` to the home directory of the instance
-  
-
+2. From the home directory, run the command: `cd QTLaaS && source ansible_install.sh && cd ..`
+3. Clone the repo `https://github.com/MrHed/ACC-grp6.git` to the home directory of the instance
+4. From the home directory, run the command: `cd ACC-grp6 && source SNIC.sh && python3 run.py`
+5. The Flask 
 
 
 To run the Flask app:
