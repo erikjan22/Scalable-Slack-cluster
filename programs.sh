@@ -9,10 +9,11 @@ apt-get install -y python3
 apt-get install -y python-pip
 pip install --upgrade pip
 pip install flask
+pip install ruamel.yaml
 
 apt install software-properties-common
 add-apt-repository cloud-archive:queens
-
+apt update && apt dist-upgrade
 apt install python-openstackclient
 
 if [ ! -d "../QTLaaS" ]; then
