@@ -6,8 +6,7 @@ In order to run the service one first need to create a instance and using super 
 1. Clone the repository with `git clone https://github.com/MrHed/ACC-grp6.git` to the home directory of the instance.
 2. Start the script `programs.sh` as sudo user, so first `sudo bash` to become sudo user, then run `bash programs.sh`. This will install the necessary programs and update them and also clone the repository `https://github.com/QTLaaS/QTLaaS.git` to the home directory on the instance.
 3. From the home directory, run the command: `cd QTLaaS && source ansible_install.sh && cd ..`
-4. From the home directory, run the command: `cd ACC-grp6 && source SNIC.sh && python3 run.py`
-5. To run the Flask app go to the folder `ACC-grp6` and run `python3 run.py`, this will start the Flask server.
+4. From the home directory, run the command: `cd ACC-grp6 && source SNIC.sh && python3 run.py`, this will start the Flask server.
 
 
 From another terminal it is now possible to run different commands. To start a stack do
