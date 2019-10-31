@@ -9,14 +9,15 @@ In order to run the service one first need to create a instance and using super 
 4. From the home directory, run the command: `cd ACC-grp6 && source SNIC.sh && python3 run.py`, this will start the Flask server.
 
 
-From another terminal it is now possible to run different commands. To start a stack do
+The Flask server needs to be opened in one terminal and run. From another terminal it is now possible to run different commands. To start a stack do
 * `curl -i http://0.0.0.0:5000/QTL/setup?workers=NUM`  
 
 where `NUM` is the number of workers to start the instance with. This will run the Heat template and put in the number of workers in this file.   
 
 Other possible commands are  
-* `curl -i http://0.0.0.0:5000/QTL/modify`
+* `curl -i http://0.0.0.0:5000/QTL/upscaling?workers=NUM`
+* `curl -i http://0.0.0.0:5000/QTL/downscaling?workers=NUM`
 * `curl -i http://0.0.0.0:5000/QTL/stack`
 * `curl -i http://0.0.0.0:5000/QTL/delete`
 
-The modify command lets the user specify how many users to add to the stack. The stack command show how many workers there currently are on the stack, and the delete stack command terminates the cluster. 
+The upscaling command lets the user specify how many users to add to the stack, and the downscaling removes workers from the stack. The stack command show how many workers there currently are on the stack, and the delete stack command terminates the cluster. 
