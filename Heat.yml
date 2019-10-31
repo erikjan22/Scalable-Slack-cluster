@@ -1,86 +1,85 @@
-#
-# Deploying a network and a compute instance using Heat
-#
-heat_template_version: 2013-05-23
-
 description: Deploying new master, and mutliple workers.
-
-parameters:
-  key_name:
-    type: string
-    description: Name of an existing key pair to use for the server
-    default: team6key
-    constraints:
-      - custom_constraint: nova.keypair
-  flavor:
-    type: string
-    description: Flavor for the server to be created
-    default: ssc.small
-    constraints:
-      - custom_constraint: nova.flavor
-
-  image:
-    type: string
-    description: Image ID or image name to use for the server
-    default: d0c8f522-ffc7-4224-907d-72145525904e
-    constraints:
-      - custom_constraint: glance.image
-    
-  net1:
-    type: string
-    description: (existing) network for the server to be created
-    default: SNIC 2019/10-32 Internal IPv4 Network
-    constraints:
-      - custom_constraint: neutron.network
-  
-  node_count:
-    type: number
-    default: 4
-    description: Default number of nodes
-resources:
- 
-
-  Master:
-    type: OS::Nova::Server
-    properties:
-      name: team6_sparkmaster
-      key_name: { get_param: key_name }
-      image: { get_param: image }
-      flavor: { get_param: flavor }
-
-      networks:
-        - network: {get_param: net1}
-      security_groups: [team6]
-      user_data: |
-            #!/bin/sh
-              echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC7MO3V59P1dV0RVzyBtWr8v/N4ND9391MOl2Urv1G3qFx7kob0SLPnr4mpew9xDB+3ZzDPRlFts7eLeTiq4pWpwybeZ40KUnAHKttTli7uhAkBKpHYKMOH7WvuMuHYJjY416KfBj2XulpDdS9Jtue/sWOKDZEF+iP1X6wcIuDDd3WAj5dQ7y+IGmFxgGR4U9/tTgnfVL4scVJKu8M9igHyisHNdr7qDi7Z8yhd4sg/b1EFJ6vmirCjKWWgwprhtmxvhZLjnpTxwzwrccztO9wdlj84L61VFAzKvdIc1nwdNJv3AXVzY38LCjdYqSaaiobZtzKfD+/Ryh6k+PSdLqGB ubuntu@team6ansiblehost" >> /home/ubuntu/.ssh/authorized_keys
-              apt-add-repository -y ppa:ansible/ansible
-              apt-get update -y
-              apt-get upgrade -y
-      user_data_format: RAW
-
-  group_slaves:
-    type: OS::Heat::ResourceGroup
-    properties:
-      count: {get_param: node_count}
-      removal_policies: [{'resource_list': ['0']}]
-      resource_def:
-        type: OS::Nova::Server
-        properties:
-          name: team6_sparkworker%index% 
-          flavor: { get_param: flavor }
-          image: { get_param: image }
-          key_name: { get_param: key_name }
-          networks:
-            - network: { get_param: net1}
-          security_groups: [team6]
-          user_data: |
-            #!/bin/sh
-            echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC7MO3V59P1dV0RVzyBtWr8v/N4ND9391MOl2Urv1G3qFx7kob0SLPnr4mpew9xDB+3ZzDPRlFts7eLeTiq4pWpwybeZ40KUnAHKttTli7uhAkBKpHYKMOH7WvuMuHYJjY416KfBj2XulpDdS9Jtue/sWOKDZEF+iP1X6wcIuDDd3WAj5dQ7y+IGmFxgGR4U9/tTgnfVL4scVJKu8M9igHyisHNdr7qDi7Z8yhd4sg/b1EFJ6vmirCjKWWgwprhtmxvhZLjnpTxwzwrccztO9wdlj84L61VFAzKvdIc1nwdNJv3AXVzY38LCjdYqSaaiobZtzKfD+/Ryh6k+PSdLqGB ubuntu@team6ansiblehost" >> /home/ubuntu/.ssh/authorized_keys
-            apt-get update -y
-            apt-get upgrade -y
-          user_data_format: RAW
+heat_template_version: 2013-05-23
 outputs:
   server_networks:
     description: The networks of the deployed server
-    value: { get_attr: [Master, networks] }
+    value:
+      get_attr:
+      - Master
+      - networks
+parameters:
+  flavor:
+    constraints:
+    - custom_constraint: nova.flavor
+    default: ssc.small
+    description: Flavor for the server to be created
+    type: string
+  image:
+    constraints:
+    - custom_constraint: glance.image
+    default: d0c8f522-ffc7-4224-907d-72145525904e
+    description: Image ID or image name to use for the server
+    type: string
+  key_name:
+    constraints:
+    - custom_constraint: nova.keypair
+    default: team6key
+    description: Name of an existing key pair to use for the server
+    type: string
+  net1:
+    constraints:
+    - custom_constraint: neutron.network
+    default: SNIC 2019/10-32 Internal IPv4 Network
+    description: (existing) network for the server to be created
+    type: string
+  node_count:
+    default: 1
+    description: Default number of nodes
+    type: number
+resources:
+  Master:
+    properties:
+      flavor:
+        get_param: flavor
+      image:
+        get_param: image
+      key_name:
+        get_param: key_name
+      name: team6_sparkmaster
+      networks:
+      - network:
+          get_param: net1
+      security_groups:
+      - team6
+      user_data: "#!/bin/sh\n  echo \"ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC7MO3V59P1dV0RVzyBtWr8v/N4ND9391MOl2Urv1G3qFx7kob0SLPnr4mpew9xDB+3ZzDPRlFts7eLeTiq4pWpwybeZ40KUnAHKttTli7uhAkBKpHYKMOH7WvuMuHYJjY416KfBj2XulpDdS9Jtue/sWOKDZEF+iP1X6wcIuDDd3WAj5dQ7y+IGmFxgGR4U9/tTgnfVL4scVJKu8M9igHyisHNdr7qDi7Z8yhd4sg/b1EFJ6vmirCjKWWgwprhtmxvhZLjnpTxwzwrccztO9wdlj84L61VFAzKvdIc1nwdNJv3AXVzY38LCjdYqSaaiobZtzKfD+/Ryh6k+PSdLqGB\
+        \ ubuntu@team6ansiblehost\" >> /home/ubuntu/.ssh/authorized_keys\n  apt-add-repository\
+        \ -y ppa:ansible/ansible\n  apt-get update -y\n  apt-get upgrade -y\n"
+      user_data_format: RAW
+    type: OS::Nova::Server
+  group_slaves:
+    properties:
+      count:
+        get_param: node_count
+      removal_policies:
+      - resource_list:
+        - '0'
+      resource_def:
+        properties:
+          flavor:
+            get_param: flavor
+          image:
+            get_param: image
+          key_name:
+            get_param: key_name
+          name: team6_sparkworker%index%
+          networks:
+          - network:
+              get_param: net1
+          security_groups:
+          - team6
+          user_data: "#!/bin/sh\necho \"ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC7MO3V59P1dV0RVzyBtWr8v/N4ND9391MOl2Urv1G3qFx7kob0SLPnr4mpew9xDB+3ZzDPRlFts7eLeTiq4pWpwybeZ40KUnAHKttTli7uhAkBKpHYKMOH7WvuMuHYJjY416KfBj2XulpDdS9Jtue/sWOKDZEF+iP1X6wcIuDDd3WAj5dQ7y+IGmFxgGR4U9/tTgnfVL4scVJKu8M9igHyisHNdr7qDi7Z8yhd4sg/b1EFJ6vmirCjKWWgwprhtmxvhZLjnpTxwzwrccztO9wdlj84L61VFAzKvdIc1nwdNJv3AXVzY38LCjdYqSaaiobZtzKfD+/Ryh6k+PSdLqGB\
+            \ ubuntu@team6ansiblehost\" >> /home/ubuntu/.ssh/authorized_keys\napt-get\
+            \ update -y\napt-get upgrade -y\n"
+          user_data_format: RAW
+        type: OS::Nova::Server
+    type: OS::Heat::ResourceGroup
