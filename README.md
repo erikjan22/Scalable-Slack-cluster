@@ -9,7 +9,10 @@ In order to run the service one first need to create a instance and using super 
 4. From the home directory, run the command: `cd ACC-grp6 && source SNIC.sh && python3 run.py`, this will start the Flask server.
 
 
-The Flask server needs to be opened in one terminal and run. From another terminal it is now possible to run different commands. To start a stack do
+The Flask server needs to be opened in one terminal and run. Whenever we build new instanes it will ask to add new fingerprints, enter `yes` in the terminal to continue.
+
+
+From another terminal it is now possible to run different commands. To start a stack do
 * `curl -i http://0.0.0.0:5000/QTL/setup?workers=NUM`  
 
 where `NUM` is the number of workers to start the instance with. This will run the Heat template and put in the number of workers in this file.   
