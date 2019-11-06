@@ -1,3 +1,7 @@
+# Comments by Erik
+Currently many improvements necessary.
+
+
 # ACC group 6
 ## QTL as a service (QTLaaS), a cloud service for genetic analysis
 
