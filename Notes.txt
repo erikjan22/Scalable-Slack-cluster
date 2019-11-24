@@ -1,0 +1,18 @@
+# Don't forget to generate a standard ssh key pair:
+ssh-keygen
+
+# Make the cloud_var.sh file runnable, and then use source to create variables
+chmod +x cloud_var.sh
+source ./cloud_var.sh
+
+# You can now create a vm with our defined settings:
+az vm create -n SparkNode1 --image $VMIMAGE
+
+# Command to find the latest Ubuntu 16.04 images. You can choose any from this list:
+az vm image list --all -p Canonical -f UbuntuServer -s 16.04 --query [].urn -o tsv
+
+
+### DONT FORGET THAT USER IS STILL HARDCODED IN SOME FILES
+- /etc/ansible/hosts
+- spark_deployment.yaml
+- setup_var.yml
