@@ -1,0 +1,11 @@
+{
+  "fqdns": "",
+  "id": "/subscriptions/cea02b46-9f7a-4bdf-8a74-0611e6449d0e/resourceGroups/SparkAutomation/providers/Microsoft.Compute/virtualMachines/SparkNode1",
+  "location": "northeurope",
+  "macAddress": "00-0D-3A-B1-17-A2",
+  "powerState": "VM running",
+  "privateIpAddress": "10.0.0.5",
+  "publicIpAddress": "40.112.64.134",
+  "resourceGroup": "SparkAutomation",
+  "zones": ""
+}

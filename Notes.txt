@@ -1,3 +1,9 @@
+# Installing Azure CLI and login:
+sudo apt-get update
+sudo apt-get install -y libssl-dev libffi-dev python-dev build-essential
+curl -L https://aka.ms/InstallAzureCli | bash
+az login
+
 # Don't forget to generate a standard ssh key pair:
 ssh-keygen
 
@@ -5,12 +11,35 @@ ssh-keygen
 chmod +x cloud_var.sh
 source ./cloud_var.sh
 
+# For locale settings:
+export LC_ALL="en_US.UTF-8"
+export LC_CTYPE="en_US.UTF-8"
+sudo dpkg-reconfigure locales
+
+# Installation for handling json files
+# sudo apt install jq
+pip3 install simplejson
+
+# Start with creating a json file:
+[
+  {
+    "Master" : false,
+    "NumberSlaves" : 0
+  }
+]
+
+# Set defualt resource group:
+az configure --defaults group=SparkAutomation
+
 # You can now create a vm with our defined settings:
 az vm create -n SparkNode1 --image $VMIMAGE
 
 # Command to find the latest Ubuntu 16.04 images. You can choose any from this list:
 az vm image list --all -p Canonical -f UbuntuServer -s 16.04 --query [].urn -o tsv
 
+# Update ClusterInfo
+python3 UpscaleClusterInfo.py <vm name> <optional: whether or not vm is master node>
+rm ClusterInfo.json && mv ClusterInfoUpdated.json ClusterInfo.json
 
 ### DONT FORGET THAT USER IS STILL HARDCODED IN SOME FILES
 - /etc/ansible/hosts
