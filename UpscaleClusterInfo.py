@@ -3,20 +3,15 @@
 import simplejson as json
 import sys
 
-def update_cluster_info(args):
+def upscale_cluster_info(VMname, master=False):
   """ Function which updates the ClusterInfo.json file after new nodes are created.
   Calling this function with the argument consisting of multiple elements will result in a master node being added to the info.
   Else a slave node will be added to the info.
   """
   with open('TemporaryInfo.json', mode='r') as jsonfile:
     TemporaryInfo = json.load(jsonfile)
-    VMname = args[0]
     privateIP = TemporaryInfo.get("privateIpAddress")
     publicIP = TemporaryInfo.get("publicIpAddress")
-    if len(args) > 1:
-      master = True
-    else:
-      master = False
     jsonfile.close()
 
   with open('ClusterInfo.json', mode='r') as jsonfile:
@@ -51,9 +46,14 @@ def update_cluster_info(args):
     json.dump(ClusterInfo, jsonfile)
     jsonfile.close()
 
+    return
+
 
 
 if __name__ == '__main__':
   if len(sys.argv) == 1 or len(sys.argv) > 3:
     sys.exit('Wrong arguments given.')
-  update_cluster_info(sys.argv[1:])
+  elif len(sys.argv) == 2:
+    upscale_cluster_info(sys.argv[1])
+  else:
+    upscale_cluster_info(sys.argv[1], True)

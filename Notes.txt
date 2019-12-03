@@ -1,3 +1,5 @@
+### SETUP ###
+
 # Installing Azure CLI and login:
 sudo apt-get update
 sudo apt-get install -y libssl-dev libffi-dev python-dev build-essential
@@ -30,17 +32,50 @@ pip3 install simplejson
 # Set defualt resource group:
 az configure --defaults group=SparkAutomation
 
-# You can now create a vm with our defined settings:
-az vm create -n SparkNode1 --image $VMIMAGE > TemporaryInfo.json
-
 # Command to find the latest Ubuntu 16.04 images. You can choose any from this list:
 az vm image list --all -p Canonical -f UbuntuServer -s 16.04 --query [].urn -o tsv
 
-# Update ClusterInfo
-python3 UpscaleClusterInfo.py <vm name> <optional: whether or not vm is master node>
-rm TemporaryInfo.json && rm ClusterInfo.json && mv ClusterInfoUpdated.json ClusterInfo.json
-
-### DONT FORGET THAT USER IS STILL HARDCODED IN SOME FILES
+# DONT FORGET THAT USER IS STILL HARDCODED IN SOME FILES
 - /etc/ansible/hosts
 - spark_deployment.yaml
 - setup_var.yml
+
+
+### CLUSTER ACTIONS ###
+
+# You can now create a vm with our defined settings:
+az vm create -n <name of node> --image $VMIMAGE > TemporaryInfo.json
+
+# After creating a new VM, Update ClusterInfo
+if python3 UpscaleClusterInfo.py <str vm name> <optional: whether or not vm is master node>; then
+     rm TemporaryInfo.json && rm ClusterInfo.json && mv ClusterInfoUpdated.json ClusterInfo.json
+else
+     echo 'No overwrite of ClusterInfo.json, something went wrong. See ClusterInfoUpdated.json for output.'
+
+# Update the ssh files according to the current info in ClusterInfo.json
+python3 UpdateHostFiles.py <str ip of ansible node> <str username>
+
+# Remove a machine with the az cli
+az vm delete --name <name of node>
+
+# After deleting a VM from the cluster, Update ClusterInfo
+if python3 DownscaleClusterInfo.py; then
+     rm ClusterInfo.json && mv ClusterInfoUpdated.json ClusterInfo.json
+else
+     echo 'No overwrite of ClusterInfo.json, something went wrong. See ClusterInfoUpdated.json for output.'
+
+# Don't forget to update the ssh files according to the current info in ClusterInfo.json
+python3 UpdateHostFiles.py <str ip of ansible node> <str username>
+
+# Remove the entire cluster
+...
+
+# Empty the ClusterInfo and only keep the basic (empty) skeleton
+if python3 EmptyClusterInfo.py; then
+     rm ClusterInfo.json && mv ClusterInfoUpdated.json ClusterInfo.json
+else
+     echo 'No overwrite of ClusterInfo.json, something went wrong. See ClusterInfoUpdated.json for output.'
+
+# Don't forget to update the ssh files according to the current info in ClusterInfo.json
+python3 UpdateHostFiles.py <str ip of ansible node> <str username>
+
