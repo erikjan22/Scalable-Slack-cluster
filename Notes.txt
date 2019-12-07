@@ -1,14 +1,5 @@
 ### SETUP ###
 
-# Installing Azure CLI and login:
-sudo apt-get update
-sudo apt-get install -y libssl-dev libffi-dev python-dev build-essential
-curl -L https://aka.ms/InstallAzureCli | bash
-az login
-
-# Don't forget to generate a standard ssh key pair:
-ssh-keygen
-
 # Make the cloud_var.sh file runnable, and then use source to create variables
 chmod +x cloud_var.sh
 source ./cloud_var.sh
@@ -17,20 +8,6 @@ source ./cloud_var.sh
 export LC_ALL="en_US.UTF-8"
 export LC_CTYPE="en_US.UTF-8"
 sudo dpkg-reconfigure locales
-
-# Installation for handling json files
-pip3 install simplejson
-
-# Start with creating a json file:
-[
-  {
-    "ExistMaster" : false,
-    "NumberSlaves" : 0
-  }
-]
-
-# Set defualt resource group:
-az configure --defaults group=SparkAutomation
 
 # Command to find the latest Ubuntu 16.04 images. You can choose any from this list:
 az vm image list --all -p Canonical -f UbuntuServer -s 16.04 --query [].urn -o tsv
@@ -42,6 +19,16 @@ az vm image list --all -p Canonical -f UbuntuServer -s 16.04 --query [].urn -o t
 
 
 ### CLUSTER ACTIONS ###
+
+# Setup a new cluster:
+# Create a json file for storage of information about the cluster
+echo "[
+  {
+    "ExistMaster" : false,
+    "NumberSlaves" : 0
+  }
+]" > ClusterInfo.json
+
 
 # You can now create a vm with our defined settings:
 az vm create -n <name of node> --image $VMIMAGE > TemporaryInfo.json

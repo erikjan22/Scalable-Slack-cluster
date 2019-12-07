@@ -36,7 +36,7 @@
    - name: adding paths
      lineinfile: dest="{{rc_file}}" line='export PATH=$PATH:{{spark_home}}/bin/:{{scala_home}}/bin\nexport JAVA_HOME={{java_home}}\nSPARK_HOME={{spark_home}}' insertafter='EOF' regexp='export PATH=\$SPARK_HOME' state=present 
 
-     #lineinfile: dest=/home/erik/.bashrc line='export PATH=$PATH:/usr/local/spark-1.6.1-bin-hadoop2.6/bin/:/usr/local/scala-2.11.8/bin\nexport JAVA_HOME=/usr/lib/jvm/java-7-openjdk-amd64\nSPARK_HOME=/usr/local/spark-1.6.1-bin-hadoop2.6' insertafter='EOF' regexp='export PATH=\$SPARK_HOME' state=present 
+     #lineinfile: dest=/home/{$USERNAME}/.bashrc line='export PATH=$PATH:/usr/local/spark-1.6.1-bin-hadoop2.6/bin/:/usr/local/scala-2.11.8/bin\nexport JAVA_HOME=/usr/lib/jvm/java-7-openjdk-amd64\nSPARK_HOME=/usr/local/spark-1.6.1-bin-hadoop2.6' insertafter='EOF' regexp='export PATH=\$SPARK_HOME' state=present 
    
    - name: source bashrc   
      shell: . "{{rc_file}}"
@@ -128,12 +128,12 @@
    - name: adding paths
      lineinfile: dest={{rc_file}} line='export JUPYTER_CONFIG_DIR={{jupyter_config_dir}}\n export JUPYTER_PATH={{jupyter_path}}\nexport JUPYTER_RUNTIME_DIR={{jupyter_runtime_dir}}' insertafter='EOF' regexp='export JUPYTER_PATH' state=present 
 
-     #lineinfile: dest=/home/erik/.bashrc line='export JUPYTER_CONFIG_DIR=/usr/local/etc/jupyter\n export JUPYTER_PATH=/usr/local/share/jupyter\nexport JUPYTER_RUNTIME_DIR=/usr/local/share/jupyter-runtime' insertafter='EOF' regexp='export PATH=\$SPARK_HOME' state=present 
+     #lineinfile: dest=/home/{$USERNAME}/.bashrc line='export JUPYTER_CONFIG_DIR=/usr/local/etc/jupyter\n export JUPYTER_PATH=/usr/local/share/jupyter\nexport JUPYTER_RUNTIME_DIR=/usr/local/share/jupyter-runtime' insertafter='EOF' regexp='export PATH=\$SPARK_HOME' state=present 
    
    - name: source bashrc   
      shell: . {{rc_file}}
 
-     #shell: . /home/erik/.bashrc
+     #shell: . /home/{$USERNAME}/.bashrc
 
    - name:  add IRKernel
      command: /usr/bin/Rscript --slave --no-save --no-restore-history -e "devtools::install_github('IRkernel/IRkernel')"
@@ -142,13 +142,13 @@
      command: /usr/bin/Rscript --slave --no-save --no-restore-history -e "IRkernel::installspec(user = FALSE)"
 
    - name: start jupyter
-     shell: runuser -l erik -c 'jupyter notebook --ip=0.0.0.0 --port=60060 &'
+     shell: runuser -l {$USERNAME} -c 'jupyter notebook --ip=0.0.0.0 --port=60060 &'
      async: 2592000               # 60*60*24*30 – 1 month
      args:
       executable: /bin/bash 
    
    - name: jupyter server token
-     shell: cat /home/erik/.local/share/jupyter/runtime/*.json | grep token
+     shell: cat /home/{$USERNAME}/.local/share/jupyter/runtime/*.json | grep token
      register: token
 
    - debug:

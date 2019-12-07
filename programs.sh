@@ -1,26 +1,28 @@
 #! /bin/sh
 
-apt-get update
-apt-get -y upgrade
-apt-get install -y git
+echo -e "\nStep 1 out of 3: Get updates.\n"
+sudo apt-get --assume-yes update
+sudo apt-get --assume-yes upgrade
 
-apt-get install -y python
-apt-get install -y python3
-apt-get install -y python-pip
-pip install --upgrade pip
+echo -e "\nStep 2 out of 3: Install the necessary programs.\n"
+sudo apt-get install --assume-yes python
+sudo apt-get install --assume-yes python3
+sudo apt-get install --assume-yes python3-pip
+# pip install --upgrade pip
+
+pip3 install simplejson  # Installation for handling json files
+
+sudo apt-get install -y libssl-dev libffi-dev python-dev build-essential
+curl -L https://aka.ms/InstallAzureCli | bash
+
 pip install flask
-pip install ruamel.yaml
+#pip install ruamel.yaml
+#apt update && apt dist-upgrade
 
-apt install software-properties-common
-add-apt-repository cloud-archive:queens
-apt update && apt dist-upgrade
-apt install python-openstackclient
+echo -e "\nStep 3 out of 3: Perform necessary azure operations.\n"
+ssh-keygen   # Generate a ssh key
+# Log-in to az, very important
+az login
 
-if [ ! -d "../QTLaaS" ]; then
-    cd ../ && git clone https://github.com/QTLaaS/QTLaaS.git
-    echo "Cloned QTLaaS"
-else
-    echo "QTLaaS already exists"
-fi
-
-echo "SUCCESS"
+# Set defualt resource group:
+az configure --defaults group=$RESOURCEGROUP

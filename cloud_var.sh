@@ -5,6 +5,10 @@
 export USERNAME='erik'
 echo 'Your user name: ' $USERNAME
 
+# Name the azure resource group within which you want to create new VMs. This resource group already has to exist.
+export RESOURCEGROUP='SparkAutomation'
+echo 'Your resource group is: ' $RESOURCEGROUP
+
 # Define the ip of the main machine, ansible-node. This is the machine from which the Spark cluster is started.
 # It can be another Virtual Machine or your local machine.
 export ANSIBLEIP='10.0.0.4'

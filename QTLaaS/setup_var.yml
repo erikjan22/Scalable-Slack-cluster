@@ -1,4 +1,4 @@
-rc_file: /home/erik/.bashrc
+rc_file: /home/{$USERNAME}/.bashrc
 spark_home: /usr/local/spark-2.3.4-bin-hadoop2.7
 scala_home: /usr/local/scala-2.11.8
 java_home: /usr/lib/jvm/java-1.8.0-openjdk-amd64 
