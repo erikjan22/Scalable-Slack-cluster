@@ -1,0 +1,12 @@
+ansible_host ansible_ssh_host=10.0.0.4
+sparkmaster ansible_ssh_host=10.0.0.5
+sparkworker1 ansible_ssh_host=10.0.0.6
+
+[configNode]
+ansible-node ansible_connection=local ansible_user=erik
+
+[sparkmaster]
+sparkmaster ansible_connection=ssh ansible_user=erik
+
+[sparkworker]
+sparkworker1 ansible_connection=ssh ansible_user=erik

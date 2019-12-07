@@ -21,16 +21,16 @@ def write_to_host_files(ansibleip, username):
     slaveids = []
     slaveips = []
     for node in ClusterInfo:
-      if node.get('role') == 'Master':
-        masterip = node.get('privateIP')
-      elif node.get('role') == 'Slave':
-        slavenames.append(node.get('VMname'))
-        slaveids.append(node.get('SlaveID'))
-        slaveips.append(node.get('privateIP'))
+      if node.get("role") == "Master":
+        masterip = node.get("privateIP")
+      elif node.get("role") == "Slave":
+        slavenames.append(node.get("VMname"))
+        slaveids.append(node.get("SlaveID"))
+        slaveips.append(node.get("privateIP"))
 
   # Write to /etc/hosts
-  #with open(PATH+"/hosts", "w") as f:
-  with open("hosts", "w") as f:
+  with open(PATH+"/hosts", "w") as f:
+  #with open("hosts", "w") as f:
     f.writelines(ansibleip + " ansible-host\n")
     f.writelines(masterip + " sparkmaster\n")
     for i in range(len(slaveips)):
@@ -54,8 +54,8 @@ def write_to_host_files(ansibleip, username):
   master_conn  = " ansible_connection=ssh ansible_user=" + username
   worker_conn  = " ansible_connection=ssh ansible_user=" + username
 
-  #with open(PATH+"/ansible/hosts", "w") as f:
-  with open("ansiblehosts", "w") as f:
+  with open(PATH+"/ansible/hosts", "w") as f:
+  #with open("ansiblehosts", "w") as f:
     f.writelines("ansible_host" + ansible_host + ansibleip  + "\n")
     f.writelines("sparkmaster" + ansible_host + masterip + "\n")
     for i in range(len(slaveips)):

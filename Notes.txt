@@ -24,8 +24,8 @@ az vm image list --all -p Canonical -f UbuntuServer -s 16.04 --query [].urn -o t
 # Create a json file for storage of information about the cluster
 echo "[
   {
-    "ExistMaster" : false,
-    "NumberSlaves" : 0
+    \"ExistMaster\" : false,
+    \"NumberSlaves\" : 0
   }
 ]" > ClusterInfo.json
 

@@ -14,6 +14,11 @@ echo 'Your resource group is: ' $RESOURCEGROUP
 export ANSIBLEIP='10.0.0.4'
 echo 'The ip of your ansible node is: ' $ANSIBLEIP
 
+# Define the names of the VMs which will function as spark master and spark slaves
+# The names below should work fine. An integer counter will automatically be added to the slave nodes to distinguish them
+export MASTERNAME='masternode'
+export SLAVENAME='slavenode'
+
 # Define standard image
 export VMIMAGE='Canonical:UbuntuServer:16.04-LTS:16.04.201910310'
 echo 'The ubuntu image: ' $VMIMAGE

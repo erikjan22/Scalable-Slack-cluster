@@ -25,7 +25,7 @@ sudo apt-get install -y ansible
 
 
 echo -e "\nStep 3 out of 3: Perform necessary azure operations.\n"
-ssh-keygen   # Generate a ssh key
+ssh-keygen -t rsa -N ''   # Generate a ssh key, there should not be one present
 # Log-in to az, very important
 az login
 
