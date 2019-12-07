@@ -15,9 +15,14 @@ pip3 install simplejson  # Installation for handling json files
 sudo apt-get install -y libssl-dev libffi-dev python-dev build-essential
 curl -L https://aka.ms/InstallAzureCli | bash
 
-pip install flask
+pip3 install flask
 #pip install ruamel.yaml
 #apt update && apt dist-upgrade
+
+## Installing Ansible
+sudo apt-add-repository -y ppa:ansible/ansible
+sudo apt-get install -y ansible
+
 
 echo -e "\nStep 3 out of 3: Perform necessary azure operations.\n"
 ssh-keygen   # Generate a ssh key
