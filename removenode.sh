@@ -5,8 +5,7 @@
 ## Update ClusterInfo, which returns the name of the VM to be removed
 vm_to_be_deleted=$(python3 DownscaleClusterInfo.py)
 
-echo "The vm the be deleted:"
-echo $vm_to_be_deleted
+echo "The vm to be deleted:" $vm_to_be_deleted
 
 if [ ! -z $vm_to_be_deleted ]; then
      echo "Virtual machine" $vm_to_be_deleted "has been removed from the cluster info."
@@ -41,16 +40,11 @@ publicip_name=$(az network public-ip list | jq '.[] | .name' | grep $vm_to_be_de
 nsg_name=$(az network nsg list | jq '.[] | .name' | grep $vm_to_be_deleted | cut -d '"' -f 2)
 
 # Perform the actual deletions
-# in case of question: are you sure? Do this: echo y | command
-echo "Going to remove vm"
-echo y | az vm delete --name $vm_to_be_deleted
-echo "Removing nic"
+echo "Removing the vm together with its nic, public-ip, disk and nsg"
+az vm delete --name $vm_to_be_deleted --yes
 az network nic delete --name $nic_name
-echo "removing public ip"
 az network public-ip delete --name $publicip_name
-echo "removing disk"
-echo y | az disk delete --name $disk_name
-echo "removing nsg"
+az disk delete --name $disk_name --yes
 az network nsg delete --name $nsg_name
 
-echo "Finished with removal of slave node"
+echo "Finished with removal of node"

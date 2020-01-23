@@ -3,15 +3,13 @@
 # First we need to count the number of current slaves
 
 nr_slaves=$(python3 NumberWorkers.py)
-nr_slaves=$(($nr_slaves +1))
+#nr_slaves=$(($nr_slaves +1))   # Not necessary anymore
 
-echo "ID of new slave:" $nr_slaves
-
-echo $SLAVENAME$nr_slaves
+echo "Creating a new vm with the name "$SLAVENAME$nr_slaves
 
 az vm create -n $SLAVENAME$nr_slaves --image $VMIMAGE > TemporaryInfo.json
 
-if python3 UpscaleClusterInfo.py $SLAVENAME; then
+if python3 UpscaleClusterInfo.py $SLAVENAME$nr_slaves; then
     echo "Finished creating a vm"
     rm TemporaryInfo.json && rm ClusterInfo.json && mv ClusterInfoUpdated.json ClusterInfo.json
 else

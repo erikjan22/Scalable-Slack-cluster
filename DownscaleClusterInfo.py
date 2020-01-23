@@ -15,8 +15,8 @@ def downscale_cluster_info():
       jsonfile.seek(0,0)   # Return the pointer to the beginning of the file
       ClusterInfo = json.load(jsonfile)
       nrSlaves = ClusterInfo[0].get("NumberSlaves")
-      if nrSlaves == 0:
-      	sys.exit("Error: According to the 'NumberSlaves' counter in ClusterInfo there are already no more slave nodes.")
+      if nrSlaves == 1:
+      	sys.exit("Error: According to the 'NumberSlaves' counter in ClusterInfo there is only one left. However, this VM simultaneously functions as master node and can therefore not be removed.")
       elif not ClusterInfo[0]["ExistMaster"]:
         sys.exit('Error: Trying to remove a slave while according to ClusterInfo there is no master.')
     jsonfile.close()
