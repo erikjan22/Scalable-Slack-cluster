@@ -1,6 +1,3 @@
-# Set default resource group
-# az configure --defaults group=SparkAutomation
-
 # Define username. This is the same user name with which you started the initial VM
 export USERNAME='erik'
 echo 'Your user name: ' $USERNAME
@@ -8,6 +5,8 @@ echo 'Your user name: ' $USERNAME
 # Name the azure resource group within which you want to create new VMs. This resource group already has to exist.
 export RESOURCEGROUP='SparkAutomation'
 echo 'Your resource group is: ' $RESOURCEGROUP
+# Set default resource group for the azure cli
+az configure --defaults group=SparkAutomation
 
 # Define the ip of the main machine, ansible-node. This is the machine from which the Spark cluster is started.
 # It can be another Virtual Machine or your local machine.

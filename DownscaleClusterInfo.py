@@ -25,10 +25,10 @@ def downscale_cluster_info():
   	VMname = ClusterInfo[-1].get("VMname")
   	del ClusterInfo[-1]   # Remove the info of the final machine
   	ClusterInfo[0]["NumberSlaves"] = nrSlaves-1 # Subtract one from the number of slaves after removal
-  	print("Virtual machine '%s' has been removed from the cluster info." % (VMname))
   	json.dump(ClusterInfo, jsonfile)
   	jsonfile.close()
-  	return  	
+  	print(VMname)
+  	return
 
 
 

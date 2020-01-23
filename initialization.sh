@@ -23,6 +23,8 @@ pip3 install flask
 sudo apt-add-repository -y ppa:ansible/ansible
 sudo apt-get install -y ansible
 
+# Install the jq tool to analyze JSON in bash
+sudo apt install jq
 
 echo -e "\nStep 3 out of 3: Perform necessary azure operations.\n"
 ssh-keygen -t rsa -N ''   # Generate a ssh key, there should not be one present

@@ -15,6 +15,7 @@ def number_workers():
       ClusterInfo = json.load(jsonfile)
       nrSlaves = ClusterInfo[0].get("NumberSlaves")
     jsonfile.close()
+  print(nrSlaves)
   return nrSlaves
 
 
