@@ -1,10 +1,11 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 
 import simplejson as json
 import sys
 
 def downscale_cluster_info():
-  """ Function which updates the ClusterInfo.json file after a node has been removed from the cluster.
+  """ 
+      Function which updates the ClusterInfo.json file after a node has been removed from the cluster.
       Can only remove the master from the ClusterInfo. For this, use another function: EmptyClusterInfo.py
       Only removes the information of one machine from ClusterInfo.json
   """

@@ -2,6 +2,13 @@
 
 ## This script is used to remove nodes from the cluster
 
+# Start by checking if all the necessary variables are still set
+if [[ -z ${USERNAME+x} ]]  ||  [[ -z ${ANSIBLEIP+x} ]]; then
+    echo "User variables need to be set again!";
+    source cloud_var.sh;
+fi
+
+
 ## Update ClusterInfo, which returns the name of the VM to be removed
 vm_to_be_deleted=$(python3 DownscaleClusterInfo.py)
 
@@ -16,12 +23,6 @@ else
 fi
 
 ## Next update the ssh files according to the current info in ClusterInfo.json
-
-# Check to see if the necessary variables are still set
-if [[ -z ${USERNAME+x} ]]  ||  [[ -z ${ANSIBLEIP+x} ]]; then
-    echo "User variables need to be set again!";
-    source cloud_var.sh;
-fi
 
 sudo python3 UpdateHostFiles.py $ANSIBLEIP $USERNAME
 

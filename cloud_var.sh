@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Define username. This is the same user name with which you started the initial VM
 export USERNAME='erik'
 echo 'Your user name: ' $USERNAME

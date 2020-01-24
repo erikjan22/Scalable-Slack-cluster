@@ -1,4 +1,13 @@
+#!/bin/bash
+
 ## This script is used to create a master node, thereby starting a new cluster
+
+# Start by checking if all the necessary variables are still set
+if [[ -z ${USERNAME+x} ]]  ||  [[ -z ${ANSIBLEIP+x} ]]; then
+    echo "User variables need to be set again!";
+    source cloud_var.sh;
+fi
+
 
 az vm create -n $MASTERNAME --image $VMIMAGE > TemporaryInfo.json
 
