@@ -43,6 +43,24 @@ def remove_slave():
 
   return ("\nRemoved one slave node from the Spark cluster. \n")
 
+@app.route('/SparkCluster/destroycluster', methods=['GET', 'POST'])
+def destoy_spark_cluster():
+  """ 
+  Def: Function which removes all the nodes from the Spark cluster.
+  """
+
+  user_input = input("Are you sure you want to destoy the Spark cluster? Answer with 'yes' if that is the case. Else, answer with something else.")
+
+  if not str(user_input)=='yes':
+    return_message = "\nYou responded with '"+str(user_input)+"', thereby choosing not to destroy the cluster\n"
+    return (return_message)
+
+  print("\nRemoving all the nodes from the Spark cluster. \n")
+
+  subprocess.call("./destroycluster.sh")
+
+  return ("\nFinished removing the Spark cluster. \n")
+
 @app.route('/SparkCluster/clusterinfo', methods=['GET', 'POST'])
 def retrieve_cluster_info():
   """ 
