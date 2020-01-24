@@ -1,9 +1,13 @@
 _Next time:_ 
 
-_- create a functionality to remove the entire cluster, including the master node_
-_- there might be something wrong with the installation of pip3. Make sure the installation for ... is working_
-_- Not quite sure if the NumberWorkers is done, it both prints and returns the same value. Maybe this is not necessary_
+_- there might be something wrong with the installation of pip3. Make sure the installation for simplejson is working_
+
+_- Protect the ClusterInfo.json file from user interference_
+
+_- Modify upscaling Flask function so that user can give an argument to make multiple slaves. Do the same for downscaling_
+
 _- Integrating everything with ansilbe. How about the idea of creating an image from the master node_
+
 
 # Introduction
 The . It functions using Ubuntu 16.04 images  
