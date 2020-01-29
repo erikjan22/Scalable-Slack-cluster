@@ -25,4 +25,5 @@ fi
 
 sudo python3 UpdateHostFiles.py $ANSIBLEIP $USERNAME
 
+
 echo "Finished registering the vm"

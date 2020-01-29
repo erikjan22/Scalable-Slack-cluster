@@ -30,7 +30,7 @@ def write_to_host_files(ansibleip, username):
   # Write to /etc/hosts
   with open(PATH+"/hosts", "w") as f:
   #with open("hosts", "w") as f:
-    f.writelines(ansibleip + " ansible-host\n")
+    f.writelines(ansibleip + " ansible-node\n")
     f.writelines(masterip + " sparkmaster\n")
     for i in range(len(slaveips)):
       f.writelines(slaveips[i] + " sparkworker" + slaveids[i] + "\n")
@@ -55,7 +55,7 @@ def write_to_host_files(ansibleip, username):
 
   with open(PATH+"/ansible/hosts", "w") as f:
   #with open("ansiblehosts", "w") as f:
-    f.writelines("ansible-host" + ansible_host + ansibleip  + "\n")
+    f.writelines("ansible-node" + ansible_host + ansibleip  + "\n")
     f.writelines("sparkmaster" + ansible_host + masterip + "\n")
     for i in range(len(slaveips)):
       f.writelines("sparkworker" + slaveids[i] + ansible_host + slaveips[i] + "\n")

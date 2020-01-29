@@ -8,7 +8,7 @@ echo 'Your user name: ' $USERNAME
 export RESOURCEGROUP='SparkAutomation'
 echo 'Your resource group is: ' $RESOURCEGROUP
 # Set default resource group for the azure cli
-az configure --defaults group=SparkAutomation
+# az configure --defaults group=$RESOURCEGROUP
 
 # Define the ip of the main machine, ansible-node. This is the machine from which the Spark cluster is started.
 # It can be another Virtual Machine or your local machine.
@@ -24,5 +24,6 @@ export SLAVENAME='slavenode'
 export VMIMAGE='Canonical:UbuntuServer:16.04-LTS:16.04.201910310'
 echo 'The ubuntu image: ' $VMIMAGE
 echo
-echo 'Configuration of default azure settings complete.'
+echo 'Configuration of personal settings complete.'
+echo
 
