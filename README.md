@@ -1,6 +1,12 @@
 _remaining issues:_ 
 
+_- Fix DEPRECATION WARNING resulting from the outdated Ansible notebook_
+
+_- Issues with Spark cluster: new workers don't always want to conenct to the master_
+
 _- Check to see if in the hosts file you can also use another name than ansible-node to point to the main machine_
+
+_- makesure that port 8080 is opened on the master node_
 
 _- there might be something wrong with the installation of pip3. Make sure the installation for simplejson is working. This might have something to do with the fact that pip3 is not functioning when the locale settings have not been set properly_
 
