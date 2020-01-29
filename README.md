@@ -1,12 +1,16 @@
 _Next time:_ 
 
-_- there might be something wrong with the installation of pip3. Make sure the installation for simplejson is working_
+_- there might be something wrong with the installation of pip3. Make sure the installation for simplejson is working. This might have something to do with the fact that pip3 is not functioning when the locale settings have not been set properly_
 
 _- Protect the ClusterInfo.json file from user interference_
 
 _- Modify upscaling Flask function so that user can give an argument to make multiple slaves. Do the same for downscaling_
 
-_- Integrating everything with ansilbe. How about the idea of creating an image from the master node_
+_ - Integrate everything with ansible_
+
+_ - make sure that the flask clusterinfo option will return something logical when there is no cluster present._
+
+_- How about the idea of creating an image from the master node_
 
 
 # Introduction
@@ -24,8 +28,19 @@ The next step sets the personal information of the user in the _cloud_var_ file.
 
 
 
-
 __An interesting article I used was this:__ https://adamtheautomator.com/remove-azure-virtual-machine-powershell/ 
+
+# Flask options
+
+`curl http://127.0.0.1:5000/SparkCluster/setup` : Set up a new cluster (one node which functions as Spark master and also includes one Spark slave)
+
+`curl http://127.0.0.1:5000/SparkCluster/upscaling` : Add one node to an existing Spark cluster
+
+`curl http://127.0.0.1:5000/SparkCluster/downscaling` : Remove one node from the Spark cluster
+
+`curl http://127.0.0.1:5000/SparkCluster/destroycluster` : Destroy the entire cluster
+
+`curl http://127.0.0.1:5000/SparkCluster/clusterinfo` : Retrieve information about the cluster
 
 
 # ACC group 6
