@@ -1,4 +1,6 @@
-_Next time:_ 
+_remaining issues:_ 
+
+_- Check to see if in the hosts file you can also use another name than ansible-node to point to the main machine_
 
 _- there might be something wrong with the installation of pip3. Make sure the installation for simplejson is working. This might have something to do with the fact that pip3 is not functioning when the locale settings have not been set properly_
 
@@ -6,11 +8,23 @@ _- Protect the ClusterInfo.json file from user interference_
 
 _- Modify upscaling Flask function so that user can give an argument to make multiple slaves. Do the same for downscaling_
 
-_ - Integrate everything with ansible_
+_-How to use bash variables like $USERNAME in yml scripts?_ I think I completed this.
 
-_ - make sure that the flask clusterinfo option will return something logical when there is no cluster present._
+_- Integrate everything with ansible: --> when using ansible-playbook, ssh will ask to add fingerprint. Anser this by default with yes --> when logging in to a new machien with the saem local ip, ssh will complain, since the ip is known, but the fingerprints do not match. Use_ `ssh-keygen -f "/home/erik/.ssh/known_hosts" -R 10.0.0.5` _to remove previous fingerprint. Try to do this automatically: when deleting a machine, also remove the fingerprint._
 
-_- How about the idea of creating an image from the master node_
+_- make sure that the flask clusterinfo option will return something logical when there is no cluster present._
+
+_- put all the python files in a different folder._
+_- How about the idea of creating an image from the master node:_
+
+Through snapshow: a snapshot is like a backup copy of a Disk at a certain time. Maybe not ideal. 
+https://docs.microsoft.com/en-us/azure/virtual-machines/windows/incremental-snapshots
+https://docs.microsoft.com/en-us/cli/azure/snapshot?view=azure-cli-latest#az-snapshot-create
+https://docs.microsoft.com/en-us/azure/virtual-machines/scripts/virtual-machines-linux-cli-sample-create-vm-from-snapshot
+
+Through image: you can create an image from a vm, after which more vms can be created from this image. This seems like a good idea. The problem however is that the VM which is used to create the image than becomes unusable. 
+https://docs.microsoft.com/en-us/azure/virtual-machines/linux/tutorial-custom-images
+https://docs.microsoft.com/en-us/azure/virtual-machines/windows/capture-image-resource
 
 
 # Introduction
