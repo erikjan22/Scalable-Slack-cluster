@@ -14,13 +14,10 @@ _- Protect the ClusterInfo.json file from user interference_
 
 _- Modify upscaling Flask function so that user can give an argument to make multiple slaves. Do the same for downscaling_
 
-_-How to use bash variables like $USERNAME in yml scripts?_ I think I completed this.
-
 _- Integrate everything with ansible: --> when using ansible-playbook, ssh will ask to add fingerprint. Anser this by default with yes --> when logging in to a new machien with the saem local ip, ssh will complain, since the ip is known, but the fingerprints do not match. Use_ `ssh-keygen -f "/home/erik/.ssh/known_hosts" -R 10.0.0.5` _to remove previous fingerprint. Try to do this automatically: when deleting a machine, also remove the fingerprint._
 
 _- make sure that the flask clusterinfo option will return something logical when there is no cluster present._
 
-_- put all the python files in a different folder._
 _- How about the idea of creating an image from the master node:_
 
 Through snapshow: a snapshot is like a backup copy of a Disk at a certain time. Maybe not ideal. 
