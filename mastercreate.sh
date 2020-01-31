@@ -15,7 +15,7 @@ echo "Finished creating a vm"
 
 echo '[{"NumberSlaves": 0, "ExistMaster": false}]' > ClusterInfo.json
 
-if python3 UpscaleClusterInfo.py $MASTERNAME yes; then
+if python3 PythonScripts/UpscaleClusterInfo.py $MASTERNAME yes; then
     rm TemporaryInfo.json && rm ClusterInfo.json && mv ClusterInfoUpdated.json ClusterInfo.json
 else
     echo 'No overwrite of ClusterInfo.json, something went wrong. See ClusterInfoUpdated.json for output.'
@@ -23,7 +23,7 @@ else
 
 fi
 
-sudo python3 UpdateHostFiles.py $ANSIBLEIP $USERNAME
+sudo python3 PythonScripts/UpdateHostFiles.py $ANSIBLEIP $USERNAME
 
 
 echo "Finished registering the vm"

@@ -31,14 +31,15 @@ def upscale_cluster_info(VMname, master=False):
         newmaster = {}
         newmaster['privateIP'] = privateIP
         newmaster['publicIP'] = publicIP
-        newmaster['role'] = 'Master'
+        newmaster['role'] = 'Master_and_Slave'
         newmaster['VMname'] = VMname
+        nrSlaves += 1   # Adding a new slave to the count
         ClusterInfo[0]["ExistMaster"] = True
         ClusterInfo.append(newmaster)
 
     if not ClusterInfo[0]["ExistMaster"]:
       sys.exit('Error: Trying to add a slave while according to ClusterInfo there is no master.')
-    else:
+    if not master:
       nrSlaves += 1   # Adding a new slave to the count
       newslave = {}
       newslave['privateIP'] = privateIP
@@ -46,8 +47,9 @@ def upscale_cluster_info(VMname, master=False):
       newslave['VMname'] = VMname
       newslave['SlaveID'] = str(nrSlaves)
       newslave['role'] = 'Slave'
-      ClusterInfo[0]["NumberSlaves"] = nrSlaves
       ClusterInfo.append(newslave)
+
+    ClusterInfo[0]["NumberSlaves"] = nrSlaves
     json.dump(ClusterInfo, jsonfile)
     jsonfile.close()
 

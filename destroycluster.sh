@@ -12,13 +12,13 @@ fi
 
 
 ## Retrieve the names of the leftover machines
-vms_to_be_deleted=($(python3 print_all_machines.py | tr -d '[],'))
+vms_to_be_deleted=($(python3 PythonScripts/print_all_machines.py | tr -d '[],'))
 
 rm ClusterInfo.json
 #echo "\nRemoved the ClusterInfo.json file\n"
 
 ## Setting the host files back to the default setting
-sudo python3 reset_host_lists.py $ANSIBLEIP $USERNAME
+sudo python3 PythonScripts/reset_host_lists.py $ANSIBLEIP $USERNAME
 
 ## Finally, remove the virtual machines with all their attachments using the az cli
 for machine in "${vms_to_be_deleted[@]}"

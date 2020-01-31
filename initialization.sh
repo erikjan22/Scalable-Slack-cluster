@@ -24,10 +24,10 @@ sudo apt-add-repository -y ppa:ansible/ansible
 sudo apt-get install -y ansible
 
 # Install the jq tool to analyze JSON in bash
-sudo apt install jq
+sudo apt install -y jq
 
 echo -e "\n\nStep 3 out of 3: Perform necessary operations for setting up Azure and Ansible.\n"
-ssh-keygen -t rsa -N ''   # Generate a ssh key, there should not be one present
+ssh-keygen -f $HOME/.ssh/id_rsa -t rsa -N ''   # Generate a ssh key, there should not be one present
 # Log-in to az, very important
 az login
 

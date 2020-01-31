@@ -20,11 +20,11 @@ def write_to_host_files(ansibleip, username):
     slaveids = []
     slaveips = []
     for node in ClusterInfo:
-      if node.get("role") == "Master":
+      if node.get("role") == "Master_and_Slave":
         masterip = node.get("privateIP")
       elif node.get("role") == "Slave":
         slavenames.append(node.get("VMname"))
-        slaveids.append(node.get("SlaveID"))
+        slaveids.append(str(int(node.get("SlaveID"))-1))
         slaveips.append(node.get("privateIP"))
 
   # Write to /etc/hosts

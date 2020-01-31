@@ -10,7 +10,7 @@ fi
 
 
 ## Update ClusterInfo, which returns the name of the VM to be removed
-vm_to_be_deleted=$(python3 DownscaleClusterInfo.py)
+vm_to_be_deleted=$(python3 PythonScripts/DownscaleClusterInfo.py)
 
 echo "The vm to be deleted:" $vm_to_be_deleted
 
@@ -24,7 +24,7 @@ fi
 
 ## Next update the ssh files according to the current info in ClusterInfo.json
 
-sudo python3 UpdateHostFiles.py $ANSIBLEIP $USERNAME
+sudo python3 PythonScripts/UpdateHostFiles.py $ANSIBLEIP $USERNAME
 
 ## Finally, remove the virtual machine with all its attachments using the az cli
 

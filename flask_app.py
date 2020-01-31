@@ -70,30 +70,33 @@ def retrieve_cluster_info():
 
   cluster_info = "\n"
 
-  with open('ClusterInfo.json', mode='r') as jsonfile:
-    if len(jsonfile.readline()) == 0:
-      sys.exit('Error: ClusterInfo.json file appears to be empty.')
-    else:
-      jsonfile.seek(0,0)   # Return the pointer to the beginning of the file
-      ClusterInfo = json.load(jsonfile)
-
-      if ClusterInfo[0]["ExistMaster"]:
-        master_name = ClusterInfo[1].get("VMname")
-        master_private_ip = ClusterInfo[1].get("privateIP")
-        master_public_ip = ClusterInfo[1].get("publicIP")
-        cluster_info = cluster_info + "The master node is build on a VM named "+master_name+", with privat IP "+master_private_ip+ " and public ip "+master_public_ip+"\n"
+  try:
+    with open('ClusterInfo.json', mode='r') as jsonfile:
+      if len(jsonfile.readline()) == 0:
+        sys.exit('Error: ClusterInfo.json file appears to be empty.')
       else:
-        cluster_info += "There doesn't appear to be a master node.\n"
+        jsonfile.seek(0,0)   # Return the pointer to the beginning of the file
+        ClusterInfo = json.load(jsonfile)
 
-    for index in range(0,len(ClusterInfo)):
-      if ClusterInfo[index].get("role")=="Slave":
-        slave_name = ClusterInfo[index].get("VMname")
-        slave_private_ip = ClusterInfo[index].get("privateIP")
-        slave_public_ip = ClusterInfo[index].get("publicIP")
-        slave_id = ClusterInfo[index].get("SlaveID")
-        cluster_info = cluster_info + "Slave "+slave_id+" is build on a VM named "+slave_name+", with privat IP "+slave_private_ip+ " and public ip "+slave_public_ip+"\n"
+        if ClusterInfo[0]["ExistMaster"]:
+          master_name = ClusterInfo[1].get("VMname")
+          master_private_ip = ClusterInfo[1].get("privateIP")
+          master_public_ip = ClusterInfo[1].get("publicIP")
+          cluster_info = cluster_info + "The master node is build on a VM named "+master_name+", with privat IP "+master_private_ip+ " and public ip "+master_public_ip+"\n"
+        else:
+          cluster_info += "There doesn't appear to be a master node.\n"
+
+      for index in range(0,len(ClusterInfo)):
+        if ClusterInfo[index].get("role")=="Slave":
+          slave_name = ClusterInfo[index].get("VMname")
+          slave_private_ip = ClusterInfo[index].get("privateIP")
+          slave_public_ip = ClusterInfo[index].get("publicIP")
+          slave_id = ClusterInfo[index].get("SlaveID")
+          cluster_info = cluster_info + "Slave "+slave_id+" is build on a VM named "+slave_name+", with privat IP "+slave_private_ip+ " and public ip "+slave_public_ip+"\n"
 
     jsonfile.close()
+  except IOError:
+    cluster_info = "\nError: There is no ClusterInfo.json file!\n\n"
 
   return cluster_info
 

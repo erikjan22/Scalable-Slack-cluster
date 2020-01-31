@@ -18,15 +18,21 @@
    - name: apt update
      apt: update_cache=yes upgrade=dist
 
-   - name: install java
-     apt: pkg={{item}} state=present update_cache=true 
-     with_items:
-      - default-jre
-      - default-jdk
-  
-   - name: download spark
+   - name: check whether spark exists
+     stat:
+       path: "{{spark_home}}"
+     register: stat_result
+ 
+   - name: download spark in case it does not exist
      unarchive: src={{item}} dest=/usr/local/ copy=no
      with_items: "{{spark_urls}}"
+     when: stat_result.stat.exists == False
+
+   - name: install java
+     apt: 
+       pkg: ['default-jre', 'default-jdk']
+       state: present
+       update_cache: true
 
    - name: adding paths
      lineinfile: dest="{{rc_file}}" line='export PATH=$PATH:{{spark_home}}/bin/:{{scala_home}}/bin\nexport JAVA_HOME={{java_home}}\nSPARK_HOME={{spark_home}}' insertafter='EOF' regexp='export PATH=\$SPARK_HOME' state=present 
@@ -34,85 +40,81 @@
    - name: source bashrc   
      shell: . "{{rc_file}}"
 
-   - name: R repo key
-     apt_key: keyserver=keyserver.ubuntu.com id=E084DAB9
+#   - name: R repo key
+#     apt_key: keyserver=keyserver.ubuntu.com id=E084DAB9
 
-   - name: adding R repo
-     apt_repository: repo={{r_repo}} update_cache=yes
+#   - name: adding R repo
+#     apt_repository: repo={{r_repo}} update_cache=yes
 
-     #apt_repository: repo='deb http://ftp.acc.umu.se/mirror/CRAN/bin/linux/ubuntu trusty/' update_cache=yes
+#   - name: apt update
+#     apt: update_cache=yes upgrade=dist
+
+#   - name: install R 
+#     apt: pkg={{item}} state=present update_cache=true allow_unauthenticated=yes 
+#     with_items:
+#      - r-base
+#      - r-base-dev
+#      - libxml2-dev
  
-   - name: apt update
-     apt: update_cache=yes upgrade=dist
+#   - name: extra packages
+#     apt: pkg={{item}} state=latest update_cache=true allow_unauthenticated=yes
+#     with_items: 
+#      - libreadline-dev
+#      - libzmq5 
+#      - libzmq5-dev
+#      - libcurl4-gnutls-dev
+#      - r-cran-rcurl
+#      - libssl-dev
 
-   - name: install R 
-     apt: pkg={{item}} state=present update_cache=true allow_unauthenticated=yes 
-     with_items:
-      - r-base
-      - r-base-dev
-      - libxml2-dev
- 
-   - name: extra packages
-     apt: pkg={{item}} state=latest update_cache=true allow_unauthenticated=yes
-     with_items: 
-      - libreadline-dev
-      - libzmq5 
-      - libzmq5-dev
-      - libcurl4-gnutls-dev
-      - r-cran-rcurl
-      - libssl-dev
+#   - name: R lib instalation
+#     command: Rscript --slave --no-save --no-restore-history -e "if (! ('{{ item }}' %in% installed.packages()[,'Package'])) { install.packages(pkgs='{{ item }}', repos=c('https://cran.rstudio.com')); print('Added'); } else { print('Already installed'); }"
+#     register: r_result
+#     failed_when: "r_result.rc != 0 or 'had non-zero exit status' in r_result.stderr"
+#     changed_when: "'Added' in r_result.stdout"
+#     with_items:
+#      - RCurl
+#      - openssl
+#      - httr
+#      - git2r
+#      - libxml2-dev
+#      - roxygen2
+#      - rversions
+#      - devtools
+#      - evaluate 
+#      - jsonlite
+#      - digest
+#      - base64enc
+#      - uuid 
+#      - qtl
 
-   - name: R lib instalation
-     command: Rscript --slave --no-save --no-restore-history -e "if (! ('{{ item }}' %in% installed.packages()[,'Package'])) { install.packages(pkgs='{{ item }}', repos=c('https://cran.rstudio.com')); print('Added'); } else { print('Already installed'); }"
-     register: r_result
-     failed_when: "r_result.rc != 0 or 'had non-zero exit status' in r_result.stderr"
-     changed_when: "'Added' in r_result.stdout"
-     with_items:
-      - RCurl
-      - openssl
-      - httr
-      - git2r
-      - libxml2-dev
-      - roxygen2
-      - rversions
-      - devtools
-      - evaluate 
-      - jsonlite
-      - digest
-      - base64enc
-      - uuid 
-      - qtl
-
-   - name: R  spark integration
-     command: Rscript --slave --no-save --no-restore-history -e "if (! ('{{ item }}' %in% installed.packages()[,'Package'])) { install.packages(pkgs='{{ item }}', repos=c('http://irkernel.github.io/'), type = 'source'); print('Added'); } else { print('Already installed'); }"
-     register: r_result
-     failed_when: "r_result.rc != 0 or 'had non-zero exit status' in r_result.stderr"
-     changed_when: "'Added' in r_result.stdout"
-     with_items:
-      - rzmq
-      - repr
-      - evaluate
-      - crayon
-      - pbdZMQ
-      - devtools
-      - uuid
-      - digest
-      - IRkernel
-      - IRdisplay
+#   - name: R  spark integration
+#     command: Rscript --slave --no-save --no-restore-history -e "if (! ('{{ item }}' %in% installed.packages()[,'Package'])) { install.packages(pkgs='{{ item }}', repos=c('http://irkernel.github.io/'), type = 'source'); print('Added'); } else { print('Already installed'); }"
+#     register: r_result
+#     failed_when: "r_result.rc != 0 or 'had non-zero exit status' in r_result.stderr"
+#     changed_when: "'Added' in r_result.stdout"
+#     with_items:
+#      - rzmq
+#      - repr
+#      - evaluate
+#      - crayon
+#      - pbdZMQ
+#     - devtools
+#    - uuid
+#      - digest
+#      - IRkernel
+#      - IRdisplay
 
 - hosts: sparkmaster
   
   vars_files:
    - setup_var.yml  
 
-  tasks: 
+  tasks:
    - name: install jupyter
-     apt: pkg={{item}} state=present update_cache=true
-     with_items:
-      - python-pip
-      - python-dev
-      - build-essential
-      - python3-pip
+     apt:
+       pkg: ['python-pip', 'python-dev', 'build-essential', 'python3-pip']
+       state: present
+       update_cache: true
  
    - pip: name=pip state=latest
 
@@ -121,18 +123,14 @@
    - name: adding paths
      lineinfile: dest={{rc_file}} line='export JUPYTER_CONFIG_DIR={{jupyter_config_dir}}\n export JUPYTER_PATH={{jupyter_path}}\nexport JUPYTER_RUNTIME_DIR={{jupyter_runtime_dir}}' insertafter='EOF' regexp='export JUPYTER_PATH' state=present 
 
-     #lineinfile: dest=/home/{$USERNAME}/.bashrc line='export JUPYTER_CONFIG_DIR=/usr/local/etc/jupyter\n export JUPYTER_PATH=/usr/local/share/jupyter\nexport JUPYTER_RUNTIME_DIR=/usr/local/share/jupyter-runtime' insertafter='EOF' regexp='export PATH=\$SPARK_HOME' state=present 
-   
    - name: source bashrc   
      shell: . {{rc_file}}
 
-     #shell: . /home/{$USERNAME}/.bashrc
+#   - name:  add IRKernel
+#     command: /usr/bin/Rscript --slave --no-save --no-restore-history -e "devtools::install_github('IRkernel/IRkernel')"
 
-   - name:  add IRKernel
-     command: /usr/bin/Rscript --slave --no-save --no-restore-history -e "devtools::install_github('IRkernel/IRkernel')"
-
-   - name: start IRKernel
-     command: /usr/bin/Rscript --slave --no-save --no-restore-history -e "IRkernel::installspec(user = FALSE)"
+#   - name: start IRKernel
+#     command: /usr/bin/Rscript --slave --no-save --no-restore-history -e "IRkernel::installspec(user = FALSE)"
 
    - name: start jupyter
      shell: runuser -l "{{username}}" -c 'jupyter notebook --ip=0.0.0.0 --port=60060 &'
@@ -155,6 +153,9 @@
 
    - name: start spark master process
      shell: nohup {{spark_home}}/sbin/start-master.sh  &
+
+   - name: start spark worker process
+     shell: nohup {{spark_home}}/sbin/start-slave.sh spark://sparkmaster:7077 &
 
 - hosts: sparkworker
     
