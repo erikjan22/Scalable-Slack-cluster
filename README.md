@@ -1,22 +1,16 @@
 _remaining issues:_ 
 
-_- Fix DEPRECATION WARNING resulting from the outdated Ansible notebook_
-
-_- Issues with Spark cluster: new workers don't always want to conenct to the master_
+_- Issues with Spark cluster: new workers don't always want to connect to the master_ I have the idea that this only happens after you try to add to start an ansible playbook on an individual slave node. 
 
 _- Check to see if in the hosts file you can also use another name than ansible-node to point to the main machine_
 
 _- makesure that port 8080 is opened on the master node_
-
-_- there might be something wrong with the installation of pip3. Make sure the installation for simplejson is working. This might have something to do with the fact that pip3 is not functioning when the locale settings have not been set properly_
 
 _- Protect the ClusterInfo.json file from user interference_
 
 _- Modify upscaling Flask function so that user can give an argument to make multiple slaves. Do the same for downscaling_
 
 _- Integrate everything with ansible: --> when using ansible-playbook, ssh will ask to add fingerprint. Anser this by default with yes --> when logging in to a new machien with the saem local ip, ssh will complain, since the ip is known, but the fingerprints do not match. Use_ `ssh-keygen -f "/home/erik/.ssh/known_hosts" -R 10.0.0.5` _to remove previous fingerprint. Try to do this automatically: when deleting a machine, also remove the fingerprint._
-
-_- make sure that the flask clusterinfo option will return something logical when there is no cluster present._
 
 _- How about the idea of creating an image from the master node:_
 
@@ -39,10 +33,9 @@ You can have a look at the original cluster here....
 
 Working from a Swedish setup, I had some issues with the locale settings during installations. Although it shouldn't affect functionality, the errors are a bit annoying. To avoid these error prompts during installations, use the following commands: `export LC_ALL="en_US.UTF-8"`, `export LC_CTYPE="en_US.UTF-8"` and `sudo dpkg-reconfigure locales`
 
-Install the necessary programs witht the _initialization_ script. First make the file exacutable with `chmod +x initialization.sh` and then run it with `./initialization.sh`
-
 The next step sets the personal information of the user in the _cloud_var_ file. In this file you can enter your personal information and settings. If you want to find a different Ubuntu 16.04 image, use the following command: `az vm image list --all -p Canonical -f UbuntuServer -s 16.04 --query [].urn -o tsv`. Make the _cloud_var_ file runnable using the command `chmod +x cloud_var.sh` and then use source to create variables `source ./cloud_var.sh`
 
+Install the necessary programs with the _initialization_ script. First make the file exacutable with `chmod +x initialization.sh` and then run it with `./initialization.sh`
 
 
 __An interesting article I used was this:__ https://adamtheautomator.com/remove-azure-virtual-machine-powershell/ 
