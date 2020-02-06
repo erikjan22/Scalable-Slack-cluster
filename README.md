@@ -12,16 +12,7 @@ _- Modify upscaling Flask function so that user can give an argument to make mul
 
 _- Integrate everything with ansible: --> when using ansible-playbook, ssh will ask to add fingerprint. Anser this by default with yes --> when logging in to a new machien with the saem local ip, ssh will complain, since the ip is known, but the fingerprints do not match. Use_ `ssh-keygen -f "/home/erik/.ssh/known_hosts" -R 10.0.0.5` _to remove previous fingerprint. Try to do this automatically: when deleting a machine, also remove the fingerprint._
 
-_- How about the idea of creating an image from the master node:_
-
-Through snapshow: a snapshot is like a backup copy of a Disk at a certain time. Maybe not ideal. 
-https://docs.microsoft.com/en-us/azure/virtual-machines/windows/incremental-snapshots
-https://docs.microsoft.com/en-us/cli/azure/snapshot?view=azure-cli-latest#az-snapshot-create
-https://docs.microsoft.com/en-us/azure/virtual-machines/scripts/virtual-machines-linux-cli-sample-create-vm-from-snapshot
-
-Through image: you can create an image from a vm, after which more vms can be created from this image. This seems like a good idea. The problem however is that the VM which is used to create the image than becomes unusable. 
-https://docs.microsoft.com/en-us/azure/virtual-machines/linux/tutorial-custom-images
-https://docs.microsoft.com/en-us/azure/virtual-machines/windows/capture-image-resource
+_- Test the complete createimage.sh script_
 
 
 # Introduction
@@ -29,16 +20,26 @@ The . It functions using Ubuntu 16.04 images
 
 You can have a look at the original cluster here....
 
+Make a file _<my_file.sh>_  runnable using the command `chmod +x <my_file.sh>`
+
 # Setup
 
 Working from a Swedish setup, I had some issues with the locale settings during installations. Although it shouldn't affect functionality, the errors are a bit annoying. To avoid these error prompts during installations, use the following commands: `export LC_ALL="en_US.UTF-8"`, `export LC_CTYPE="en_US.UTF-8"` and `sudo dpkg-reconfigure locales`
 
-The next step sets the personal information of the user in the _cloud_var_ file. In this file you can enter your personal information and settings. If you want to find a different Ubuntu 16.04 image, use the following command: `az vm image list --all -p Canonical -f UbuntuServer -s 16.04 --query [].urn -o tsv`. Make the _cloud_var_ file runnable using the command `chmod +x cloud_var.sh` and then use source to create variables `source ./cloud_var.sh`
+The next step sets the personal information of the user in the _cloud_var_ file. In this file you can enter your personal information and settings. By default, we're using the image: Canonical:UbuntuServer:16.04-LTS:16.04.201910310. If you want to find a different Ubuntu 16.04 image, use the following command: `az vm image list --all -p Canonical -f UbuntuServer -s 16.04 --query [].urn -o tsv` and enter your choose within the cloud_var.sh file. Use source to create variables `source ./cloud_var.sh`
 
-Install the necessary programs with the _initialization_ script. First make the file exacutable with `chmod +x initialization.sh` and then run it with `./initialization.sh`
+Install the necessary programs with the _initialization.sh_ script using the command `./initialization.sh`
+
+# Optional - create custom image
+Create a customized image with the command `create_custom_image.sh`. This will take several minutes and will create an image from which new VMs can be started. This will greatly decrease the time needed for initializing new VMs when adding them to the spark cluster. The script will output the name of the custom image. This name should be inserted in the cloud_var.sh file, in the place of VMIMAGE. Afterwards, set the environmental variables again with the command `source ./cloud_var.sh`.
+
+After you're finished with everything this custom image can be removed from the Azure portal or with the command: `az image delete --name <YourImageName> --resource-group <YourResourceGroupName>`.
 
 
-__An interesting article I used was this:__ https://adamtheautomator.com/remove-azure-virtual-machine-powershell/ 
+Beware: "We recommend that you limit the number of concurrent deployments to 20 VMs from a single image."
+See for more information on the webpage: https://docs.microsoft.com/en-us/azure/virtual-machines/linux/tutorial-custom-images
+Another option might also be to remove the last part of the create_custom_image.sh script, so that the ImageVM is not automatically removed after creating an image. This way you can create a new image when this is needed.
+
 
 # Flask options
 
@@ -51,6 +52,14 @@ __An interesting article I used was this:__ https://adamtheautomator.com/remove-
 `curl http://127.0.0.1:5000/SparkCluster/destroycluster` : Destroy the entire cluster
 
 `curl http://127.0.0.1:5000/SparkCluster/clusterinfo` : Retrieve information about the cluster
+
+
+# Sources
+__An interesting article I used was this:__ https://adamtheautomator.com/remove-azure-virtual-machine-powershell/ 
+Also: https://docs.microsoft.com/en-us/azure/virtual-machines/windows/capture-image-resource
+Link to the two other git repos.
+
+
 
 
 # ACC group 6
