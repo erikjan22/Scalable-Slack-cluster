@@ -2,8 +2,6 @@ _remaining issues:_
 
 _- Issues with Spark cluster: new workers don't always want to connect to the master_ I have the idea that this only happens after you try to add to start an ansible playbook on an individual slave node. 
 
-_- Check to see if in the hosts file you can also use another name than ansible-node to point to the main machine_
-
 _- Protect the ClusterInfo.json file from user interference_
 
 _- Modify upscaling Flask function so that user can give an argument to make multiple slaves. Do the same for downscaling_
@@ -41,9 +39,9 @@ Another option might also be to remove the last part of the create_custom_image.
 
 `curl http://127.0.0.1:5000/SparkCluster/setup` : Set up a new cluster (one node which functions as Spark master and also includes one Spark slave)
 
-`curl http://127.0.0.1:5000/SparkCluster/upscaling` : Add one node to an existing Spark cluster
+`curl http://127.0.0.1:5000/SparkCluster/upscaling?number=1` : Add one (or more) node(s) to an existing Spark cluster
 
-`curl http://127.0.0.1:5000/SparkCluster/downscaling` : Remove one node from the Spark cluster
+`curl http://127.0.0.1:5000/SparkCluster/downscaling?number=1` : Remove one (or more) node(s) from the Spark cluster
 
 `curl http://127.0.0.1:5000/SparkCluster/destroycluster` : Destroy the entire cluster
 
