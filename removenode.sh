@@ -10,7 +10,11 @@ fi
 
 
 ## Update ClusterInfo, which returns the name of the VM to be removed
-vm_to_be_deleted=$(python3 PythonScripts/DownscaleClusterInfo.py)
+removedvm=$(python3 PythonScripts/DownscaleClusterInfo.py)
+
+vm_to_be_deleted = $(echo $removedvm | cut -d ',' -f 1)
+privateip_name = $(echo $removedvm | cut -d ',' -f 2)
+
 
 echo "The vm to be deleted:" $vm_to_be_deleted
 
@@ -47,5 +51,8 @@ az network nic delete --name $nic_name
 az network public-ip delete --name $publicip_name
 az disk delete --name $disk_name --yes
 az network nsg delete --name $nsg_name
+
+# Remove fingerprint
+ssh-keygen -f "/home/"$USERNAME"/.ssh/known_hosts" -R $privateip_name
 
 echo "Finished with removal of node"

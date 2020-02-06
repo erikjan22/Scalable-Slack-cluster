@@ -25,5 +25,12 @@ fi
 
 sudo python3 PythonScripts/UpdateHostFiles.py $ANSIBLEIP $USERNAME
 
+# Retrieve the name of the network security group
+nsg_name=$(az network nsg list | jq '.[] | .name' | grep $MASTERNAME | cut -d '"' -f 2)
+# Add security rules to make Spark webbrowser possible
+az network nsg rule create --nsg-name $nsg_name -n "AllowSparkWebBrowserInbound" --priority 1010 --destination-port-ranges 8080 --direction Inbound
+az network nsg rule create --nsg-name $nsg_name -n "AllowSparkWebBrowserOutbound" --priority 1010 --destination-port-ranges 8080 --direction Outbound
 
 echo "Finished registering the vm"
+
+

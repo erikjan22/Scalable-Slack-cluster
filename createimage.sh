@@ -31,7 +31,9 @@ sleep 30s
 
 # Process information about new machine
 VMpublicip=$(cat ImageInfo1.json | jq '.publicIpAddress' | cut -d '"' -f 2)
-echo "Retrieved public ip address:" $VMpublicip
+VMprivateip=$(cat ImageInfo1.json | jq '.privateIpAddress' | cut -d '"' -f 2)
+echo "IP addresses of the VM: public" $VMpublicip "and private" $VMprivateip
+
 
 # Use ansible to install the necesary programs on the machine
 ansible-playbook -b -i $VMpublicip"," spark_deployment.yml
@@ -78,6 +80,9 @@ az network nsg delete --name $nsg_name
 # Also remove the stored information about the machine and the image
 rm ImageInfo1.json
 rm ImageInfo2.json
+
+# Remove fingerprint
+ssh-keygen -f "/home/"$USERNAME"/.ssh/known_hosts" -R $VMprivateip
 
 # Output information about the image to the user
 echo "The created image has the name: "$ImageName

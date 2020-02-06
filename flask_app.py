@@ -1,14 +1,12 @@
 #!/usr/bin/env python
 
-from flask import Flask
+from flask import Flask, request
 import simplejson as json
 import subprocess
 
+
 app = Flask(__name__)
 
-@app.route('/')
-def hello():
-  return jsonify({"about": "Hello world"})
 
 @app.route('/SparkCluster/setup', methods=['GET', 'POST'])
 def new_cluster():
@@ -18,30 +16,61 @@ def new_cluster():
   print("\nStart of building a new cluster. \n")
 
   subprocess.call("./mastercreate.sh")
+  subprocess.call("./AnsibleScripts/ansible-master-script.sh")
 
   return ("\nDone building a new cluster. \n")
+
 
 @app.route('/SparkCluster/upscaling', methods=['GET', 'POST'])
 def new_slave():
   """ 
-  Def: Function which adds one slave node to the existing Spark cluster.
+  Def: Function which adds at most 3 slave nodes to the existing Spark cluster.
   """
-  print("\nAdding one Spark slave to the cluster. \n")
+  numberAddSlaves = request.args.get('number', '')
+  numberAddSlaves = str(numberAddSlaves)
 
-  subprocess.call("./slavecreate.sh")
+  if numberAddSlaves > 3:
+    return_message = "\nUser is trying to add "+str(numberAddSlaves)+" slaves, while at most 3 is possible")
+    return(return_message)
+  elif numberAddSlaves > 0:
+    numberAddSlaves = numberAddSlaves
+  else:
+    numberAddSlaves = 1
 
-  return ("\nAdded one slave node to the Spark cluster. \n")
+  print("\nAdding " + str(numberAddSlaves)+"  Spark slave(s) to the cluster. \n")
+
+  for i in range(0, numberAddSlaves):
+    subprocess.call("./slavecreate.sh")
+
+  print("Starting Spark processes for new nodes")
+  subprocess.call("./AnsibleScripts/ansible-slave-script.sh")
+
+  return ("\nAdded "+str(numberAddSlaves)+" slave node(s) to the Spark cluster. \n")
+
 
 @app.route('/SparkCluster/downscaling', methods=['GET', 'POST'])
 def remove_slave():
   """ 
-  Def: Function which removes one slave node from the existing Spark cluster.
+  Def: Function which removes at most 3 slave nodes from the existing Spark cluster.
   """
-  print("\nRemoving one Spark slave from the cluster. \n")
+  numberRemSlaves = request.args.get('number', '')
+  numberRemSlaves = str(numberRemSlaves)
 
-  subprocess.call("./removenode.sh")
+  if numberRemSlaves > 3:
+    return_message = "\nUser is trying to remove "+str(numberRemSlaves)+" slaves, while at most 3 is possible")
+    return(return_message)
+  elif numberRemSlaves > 0:
+    numberRemSlaves = numberRemSlaves
+  else:
+    numberRemSlaves = 1
 
-  return ("\nRemoved one slave node from the Spark cluster. \n")
+  print("\Removing " + str(numberRemSlaves)+"  Spark slave(s) from the cluster. \n")
+
+  for i in range(0, numberRemSlaves):
+    subprocess.call("./removenode.sh")
+
+  return ("\nRemoved "+str(numberRemSlaves)+" slave node(s) from the Spark cluster. \n")
+
 
 @app.route('/SparkCluster/destroycluster', methods=['GET', 'POST'])
 def destoy_spark_cluster():
@@ -60,6 +89,7 @@ def destoy_spark_cluster():
   subprocess.call("./destroycluster.sh")
 
   return ("\nFinished removing the Spark cluster. \n")
+
 
 @app.route('/SparkCluster/clusterinfo', methods=['GET', 'POST'])
 def retrieve_cluster_info():
