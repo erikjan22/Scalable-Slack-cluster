@@ -1,3 +1,3 @@
 #!/bin/bash
 
-ansible-playbook -b spark_deployment.yml --start-at-task="start spark master process"
+ansible-playbook -b spark_deployment.yml --start-at-task="source bashrc"

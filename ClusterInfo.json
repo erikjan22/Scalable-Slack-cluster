@@ -1,0 +1,1 @@
+[{"NumberSlaves": 2, "ExistMaster": true}, {"VMname": "masternode", "publicIP": "168.61.98.219", "role": "Master_and_Slave", "privateIP": "10.0.0.5"}, {"VMname": "slavenode1", "publicIP": "40.85.138.27", "role": "Slave", "SlaveID": "2", "privateIP": "10.0.0.6"}]

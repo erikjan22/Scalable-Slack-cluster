@@ -21,7 +21,8 @@ export MASTERNAME='masternode'
 export SLAVENAME='slavenode'
 
 # Define standard image
-export VMIMAGE='Canonical:UbuntuServer:16.04-LTS:16.04.201910310'
+#export VMIMAGE='Canonical:UbuntuServer:16.04-LTS:16.04.201910310'
+export VMIMAGE='CustomSparkImage'
 echo 'The ubuntu image: ' $VMIMAGE
 echo
 echo 'Configuration of personal settings complete.'

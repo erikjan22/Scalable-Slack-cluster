@@ -27,10 +27,10 @@ def new_slave():
   Def: Function which adds at most 3 slave nodes to the existing Spark cluster.
   """
   numberAddSlaves = request.args.get('number', '')
-  numberAddSlaves = str(numberAddSlaves)
+  numberAddSlaves = int(numberAddSlaves)
 
   if numberAddSlaves > 3:
-    return_message = "\nUser is trying to add "+str(numberAddSlaves)+" slaves, while at most 3 is possible")
+    return_message = "\nUser is trying to add "+str(numberAddSlaves)+" slaves, while at most 3 is possible"
     return(return_message)
   elif numberAddSlaves > 0:
     numberAddSlaves = numberAddSlaves
@@ -54,10 +54,10 @@ def remove_slave():
   Def: Function which removes at most 3 slave nodes from the existing Spark cluster.
   """
   numberRemSlaves = request.args.get('number', '')
-  numberRemSlaves = str(numberRemSlaves)
+  numberRemSlaves = int(numberRemSlaves)
 
   if numberRemSlaves > 3:
-    return_message = "\nUser is trying to remove "+str(numberRemSlaves)+" slaves, while at most 3 is possible")
+    return_message = "\nUser is trying to remove "+str(numberRemSlaves)+" slaves, while at most 3 is possible"
     return(return_message)
   elif numberRemSlaves > 0:
     numberRemSlaves = numberRemSlaves
