@@ -1,12 +1,18 @@
 _remaining issues:_ 
 
+_- Issues with Spark cluster: the slave on the master node doesn't want to start_
+
 _- Issues with Spark cluster: new workers don't always want to connect to the master_ I have the idea that this only happens after you try to add to start an ansible playbook on an individual slave node. 
 
 _- Protect the ClusterInfo.json file from user interference_
 
-_- Modify upscaling Flask function so that user can give an argument to make multiple slaves. Do the same for downscaling_
+_- Integrate everything with ansible
 
-_- Integrate everything with ansible: --> when using ansible-playbook, ssh will ask to add fingerprint. Anser this by default with yes --> when logging in to a new machien with the saem local ip, ssh will complain, since the ip is known, but the fingerprints do not match. Use_ `ssh-keygen -f "/home/erik/.ssh/known_hosts" -R 10.0.0.5` _to remove previous fingerprint. Try to do this automatically: when deleting a machine, also remove the fingerprint._
+_- when using ansible-playbook, ssh will ask to add fingerprint. Anser this by default with yes (if this is possible)._
+
+
+Old issues:
+--> when logging in to a new machien with the saem local ip, ssh will complain, since the ip is known, but the fingerprints do not match. Use_ `ssh-keygen -f "/home/erik/.ssh/known_hosts" -R 10.0.0.5` _to remove previous fingerprint. Try to do this automatically: when deleting a machine, also remove the fingerprint
 
 
 # Introduction
