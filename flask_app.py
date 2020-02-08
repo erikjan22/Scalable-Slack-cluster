@@ -15,8 +15,7 @@ def new_cluster():
   """
   print("\nStart of building a new cluster. \n")
 
-  subprocess.call("./mastercreate.sh")
-  subprocess.call("./AnsibleScripts/ansible-master-script.sh")
+  subprocess.call("./BashScripts/mastercreate.sh")
 
   return ("\nDone building a new cluster. \n")
 
@@ -40,10 +39,10 @@ def new_slave():
   print("\nAdding " + str(numberAddSlaves)+"  Spark slave(s) to the cluster. \n")
 
   for i in range(0, numberAddSlaves):
-    subprocess.call("./slavecreate.sh")
+    subprocess.call("./BashScripts/slavecreate.sh")
 
   print("Starting Spark processes for new nodes")
-  subprocess.call("./AnsibleScripts/ansible-slave-script.sh")
+  subprocess.call("./AnsibleScripts/run-ansible.sh")
 
   return ("\nAdded "+str(numberAddSlaves)+" slave node(s) to the Spark cluster. \n")
 
@@ -67,7 +66,7 @@ def remove_slave():
   print("\Removing " + str(numberRemSlaves)+"  Spark slave(s) from the cluster. \n")
 
   for i in range(0, numberRemSlaves):
-    subprocess.call("./removenode.sh")
+    subprocess.call("./BashScripts/removenode.sh")
 
   return ("\nRemoved "+str(numberRemSlaves)+" slave node(s) from the Spark cluster. \n")
 
@@ -86,7 +85,7 @@ def destoy_spark_cluster():
 
   print("\nRemoving all the nodes from the Spark cluster. \n")
 
-  subprocess.call("./destroycluster.sh")
+  subprocess.call("./BashScripts/destroycluster.sh")
 
   return ("\nFinished removing the Spark cluster. \n")
 
@@ -124,6 +123,7 @@ def retrieve_cluster_info():
           slave_id = ClusterInfo[index].get("SlaveID")
           cluster_info = cluster_info + "Slave "+slave_id+" is build on a VM named "+slave_name+", with privat IP "+slave_private_ip+ " and public ip "+slave_public_ip+"\n"
 
+    cluster_info = cluster_info + "\n"
     jsonfile.close()
   except IOError:
     cluster_info = "\nError: There is no ClusterInfo.json file!\n\n"

@@ -40,69 +40,6 @@
    - name: source bashrc   
      shell: . "{{rc_file}}"
 
-#   - name: R repo key
-#     apt_key: keyserver=keyserver.ubuntu.com id=E084DAB9
-
-#   - name: adding R repo
-#     apt_repository: repo={{r_repo}} update_cache=yes
-
-#   - name: apt update
-#     apt: update_cache=yes upgrade=dist
-
-#   - name: install R 
-#     apt: pkg={{item}} state=present update_cache=true allow_unauthenticated=yes 
-#     with_items:
-#      - r-base
-#      - r-base-dev
-#      - libxml2-dev
- 
-#   - name: extra packages
-#     apt: pkg={{item}} state=latest update_cache=true allow_unauthenticated=yes
-#     with_items: 
-#      - libreadline-dev
-#      - libzmq5 
-#      - libzmq5-dev
-#      - libcurl4-gnutls-dev
-#      - r-cran-rcurl
-#      - libssl-dev
-
-#   - name: R lib instalation
-#     command: Rscript --slave --no-save --no-restore-history -e "if (! ('{{ item }}' %in% installed.packages()[,'Package'])) { install.packages(pkgs='{{ item }}', repos=c('https://cran.rstudio.com')); print('Added'); } else { print('Already installed'); }"
-#     register: r_result
-#     failed_when: "r_result.rc != 0 or 'had non-zero exit status' in r_result.stderr"
-#     changed_when: "'Added' in r_result.stdout"
-#     with_items:
-#      - RCurl
-#      - openssl
-#      - httr
-#      - git2r
-#      - libxml2-dev
-#      - roxygen2
-#      - rversions
-#      - devtools
-#      - evaluate 
-#      - jsonlite
-#      - digest
-#      - base64enc
-#      - uuid 
-#      - qtl
-
-#   - name: R  spark integration
-#     command: Rscript --slave --no-save --no-restore-history -e "if (! ('{{ item }}' %in% installed.packages()[,'Package'])) { install.packages(pkgs='{{ item }}', repos=c('http://irkernel.github.io/'), type = 'source'); print('Added'); } else { print('Already installed'); }"
-#     register: r_result
-#     failed_when: "r_result.rc != 0 or 'had non-zero exit status' in r_result.stderr"
-#     changed_when: "'Added' in r_result.stdout"
-#     with_items:
-#      - rzmq
-#      - repr
-#      - evaluate
-#      - crayon
-#      - pbdZMQ
-#     - devtools
-#    - uuid
-#      - digest
-#      - IRkernel
-#      - IRdisplay
 
 - hosts: sparkmaster
   
@@ -126,12 +63,6 @@
    - name: source bashrc   
      shell: . {{rc_file}}
 
-#   - name:  add IRKernel
-#     command: /usr/bin/Rscript --slave --no-save --no-restore-history -e "devtools::install_github('IRkernel/IRkernel')"
-
-#   - name: start IRKernel
-#     command: /usr/bin/Rscript --slave --no-save --no-restore-history -e "IRkernel::installspec(user = FALSE)"
-
    - name: start jupyter
      shell: runuser -l "{{username}}" -c 'jupyter notebook --ip=0.0.0.0 --port=60060 &'
      async: 2592000               # 60*60*24*30 – 1 month
@@ -152,10 +83,16 @@
       - sysctl -p
 
    - name: start spark master process
-     shell: nohup {{spark_home}}/sbin/start-master.sh  &
+     shell: nohup {{spark_home}}/sbin/start-master.sh &
 
    - name: start spark worker process
      shell: nohup {{spark_home}}/sbin/start-slave.sh spark://sparkmaster:7077 &
+
+
+- hosts: all
+  tasks:
+  - name: wait for one second
+    shell: sleep 1s
 
 - hosts: sparkworker
     

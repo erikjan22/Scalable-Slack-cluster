@@ -15,7 +15,7 @@ fi
 # Check if a virtual machine for an image already exists
 currentVM=$(az vm list | jq '.[] | .name' | grep $VMImageName | cut -d '"' -f 2)
 
-if [ $currentVM != "" ]
+if [[ $currentVM != "" ]]
 then
 echo "Due to the fact that a machine called" $currentVM "exists, this script does not work"
 echo "Remove this virtual machine with all its attributes and try again."
@@ -85,5 +85,5 @@ rm ImageInfo2.json
 ssh-keygen -f "/home/"$USERNAME"/.ssh/known_hosts" -R $VMprivateip
 
 # Output information about the image to the user
-echo "The created image has the name: "$ImageName
-echo "Enter this name into the cloud_var.sh file, in place behind the VMIMAGE variable"
+echo "\nThe created image has the name: "$ImageName
+echo "Enter this name into the cloud_var.sh file, in place behind the VMIMAGE variable\n"

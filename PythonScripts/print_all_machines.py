@@ -20,7 +20,7 @@ def list_of_all_machines():
       list_vm_names = list(set(list_vm_names))
 
   print(list_vm_names)
-  return "Finished retrieving all machine names"
+  return
 
 
 
