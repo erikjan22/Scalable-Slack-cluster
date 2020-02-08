@@ -59,6 +59,6 @@ Below you can find a list of improvements which can still be made:
 
 # Sources
 
-As mentioned above, the inspiration from this topic can be found in two other git repo's: [QTL-as-a-service](https://github.com/QTLaaS/QTLaaS) and the [ACC group 6] (https://github.com/MrHed/ACC-grp6) project. No code from these sources is included in my, apart from the ansible playbook _spark_deployment.yml_, created by __sztoor__ and heavily edited by me.
+As mentioned above, the inspiration from this topic can be found in two other git repo's: [QTL-as-a-service](https://github.com/QTLaaS/QTLaaS) and the [ACC group 6](https://github.com/MrHed/ACC-grp6) project. No code from these sources is included in my, apart from the ansible playbook _spark_deployment.yml_, created by __sztoor__ and heavily edited by me.
 
 I would also like to point to an interesting article which helped me a lot: https://adamtheautomator.com/remove-azure-virtual-machine-powershell/
