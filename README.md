@@ -1,6 +1,6 @@
 # Introduction
 
-This git repo provides an automated way of setting up, upscaling, downscaling and completely removing a Spark cluster using the Azure cloud provider. This project was inspired by a group project I created with fellow students at Uppsala University (see sources below) using the SNIC Science Cloud. However, due to the unrealibility of the code in performing as desired, I decided to start a new projects from scratch.
+This git repository provides an automated way of setting up, upscaling, downscaling and completely removing a Spark cluster using the Azure cloud provider. This project was inspired by a group project I created with fellow students at Uppsala University (see sources below) using the SNIC Science Cloud. However, due to the unrealibility of the code in performing as desired, I decided to start a new projects from scratch.
 
 I cannot guarentee the code will function using virutal machines started from something else than __Ubuntu 16.04__ images  
 
@@ -59,6 +59,6 @@ Below you can find a list of improvements which can still be made:
 
 # Sources
 
-As mentioned above, the inspiration from this topic can be found in two other git repo's: [QTL-as-a-service](https://github.com/QTLaaS/QTLaaS) and the [ACC group 6](https://github.com/MrHed/ACC-grp6) project. No code from these sources is included in my, apart from the ansible playbook _spark_deployment.yml_, created by __sztoor__ and heavily edited by me.
+As mentioned above, the inspiration from this topic can be found in two other git repo's: [QTL-as-a-service](https://github.com/QTLaaS/QTLaaS) and the [ACC group 6](https://github.com/MrHed/ACC-grp6) project. No code from these sources is included in this repository, apart from the ansible playbook _spark_deployment.yml_ which was created by __sztoor__ and adjusted by me.
 
 I would also like to point to an interesting article which helped me a lot: https://adamtheautomator.com/remove-azure-virtual-machine-powershell/
