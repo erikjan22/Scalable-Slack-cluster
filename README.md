@@ -1,7 +1,9 @@
 # Introduction
+
 This git repo provides an automated way of setting up, upscaling, downscaling and completely removing a Spark cluster using the Azure cloud provider. This project was inspired by a group project I created with fellow students at Uppsala University (see sources below) using the SNIC Science Cloud. However, due to the unrealibility of the code in performing as desired, I decided to start a new projects from scratch.
 
 I cannot guarentee the code will function using virutal machines started from something else than __Ubuntu 16.04__ images  
+
 
 # Setup
 
@@ -13,6 +15,7 @@ Install the necessary programs with the _initialization.sh_ script using the com
 
 
 # Optional - create custom image
+
 Create a customized image with the command `create_custom_image.sh`. This will take several minutes and will create an image from which new virtual machines can be started. This will greatly decrease the time needed for initializing new VMs when adding them to the Spark cluster. The script will output the name of the custom image when it is finished. This name should be inserted in the _cloud_var.sh_ file, in the place where the VMIMAGE variable is defined. Be sure to set the environmental variables again with the command `source ./cloud_var.sh` when the new image has been added.
 
 After you're finished with everything this custom image can be removed from the Azure portal or with the command: `az image delete --name <YourImageName> --resource-group <YourResourceGroupName>`.
@@ -24,20 +27,20 @@ Beware, as is stated by the Azure [article](https://docs.microsoft.com/en-us/azu
 
 When the setup is completed, there are several actions which can be performed through a Flask application. This application should be started in one terminal window with the command _python3 flask_app.py_. The options below can than be executed by running the respective command from another terminal window. Be aware that most of the relevant information to the user, as well as some prompts, is presented in the first (Flask) window.
 
-`curl http://127.0.0.1:5000/SparkCluster/setup` : Set up a new cluster (one node which functions as Spark master and also includes one Spark slave)
+- `curl http://127.0.0.1:5000/SparkCluster/setup` : Set up a new cluster, which creates one node which functions as Spark master and as the first Spark slave
 
-`curl http://127.0.0.1:5000/SparkCluster/upscaling?number=1` : Add one (or more) node(s) to an existing Spark cluster
+- `curl http://127.0.0.1:5000/SparkCluster/upscaling?number=1` : Add one (or more) node(s) to an existing Spark cluster
 
-`curl http://127.0.0.1:5000/SparkCluster/downscaling?number=1` : Remove one (or more) node(s) from the Spark cluster
+- `curl http://127.0.0.1:5000/SparkCluster/downscaling?number=1` : Remove one (or more) node(s) from the Spark cluster
 
-`curl http://127.0.0.1:5000/SparkCluster/destroycluster` : Destroy the entire cluster
+- `curl http://127.0.0.1:5000/SparkCluster/destroycluster` : Destroy the entire cluster and all its traces.
 
-`curl http://127.0.0.1:5000/SparkCluster/clusterinfo` : Retrieve information about the cluster
+- `curl http://127.0.0.1:5000/SparkCluster/clusterinfo` : Retrieve information about the cluster and print it in the terminal
 
 The script automatically adds the necessary security rules, which means it's possible to view the Spark cluster using the Web UI by filling the following address in your browser: _http://<publip ip of master node>:8080/_.
 
 
-# Improvements
+# Possible improvements
 
 Below you can find a list of improvements which can still be made:
 
