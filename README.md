@@ -48,7 +48,7 @@ Below you can find a list of improvements which can still be made:
 
 - Currently the cluster expansion works by building new machines and then starting the complete ansible-playbook. This causes a number of redundant actions to happen, since the playbook has already been ran on the existing nodes in the cluster. This 'sledgehammer' approach to cluster expasnion is also rather unsubtle. However, starting the ansible playbook from a certain task, or only running the playbook on the new nodes, starts new worker processes, but doesn't seem to connect them properly to the master node.
 
-- When connecting to a new machine through ssh (which is how ansible functions), causes a prompt which asks if the user trusts this machine and if it's fingerprint should be added to 
+- When connecting to a new machine through ssh (which is how ansible functions) a prompt appears which asks if the user trusts this machine and if it's fingerprint should be remembered. It would be convenient for the user if an automated reply would be added here, which responds with *yes* to these prompts.
 
 - Currently multiple virtual machines are created and destroyed with the Azure CLI sequentially (through a for loop). It is worth checking out whether these actions can be executed in one go, as would happen when performing these actions through the Azure portal. 
 
